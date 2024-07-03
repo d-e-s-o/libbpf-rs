@@ -135,6 +135,7 @@ where
 fn test_object_build_and_load() {
     bump_rlimit_mlock();
 
+    let _x = Box::leak(Box::new(42));
     get_test_object("runqslower.bpf.o");
 }
 
@@ -2018,6 +2019,11 @@ fn test_attach_ksyscall() {
     assert_eq!(result, 1);
 }
 
+fn testxxx() -> *const i32 {
+    let u = 42;
+    &u
+}
+
 /// Check that we can invoke a program directly.
 #[tag(root)]
 #[test]
@@ -2032,7 +2038,9 @@ fn test_run_prog_success() {
         val: c_int,
     }
 
-    let value = 42;
+    let u_ptr = testxxx();
+    // XXX
+    let value = unsafe { *u_ptr };
     let state = bpf_dummy_ops_state { val: value };
     let args = [addr_of!(state) as u64];
     let input = ProgramInput {
