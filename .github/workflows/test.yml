@@ -10,7 +10,7 @@ on:
   workflow_call:
 
 jobs:
-  build:
+  test:
     name: Test [${{ matrix.rust }}, ${{ matrix.profile }}]
     runs-on: ubuntu-latest
     strategy:
@@ -60,9 +60,48 @@ jobs:
       run: cargo build --profile=${{ matrix.profile }} --locked --verbose --workspace --exclude runqslower
     - name: Run tests
       # Skip tests which require sudo
-      run: cargo test --profile=${{ matrix.profile }} --locked --verbose --workspace --exclude runqslower -- --skip ':root:'  --include-ignored
+      run: cargo test --profile=${{ matrix.profile }} --locked --verbose --workspace --exclude runqslower -- --skip ':root:' --include-ignored
     - name: Run root tests
       run: cd libbpf-rs && cargo test --profile=${{ matrix.profile }} --locked --verbose -- ':root:'
+
+  test-sanitizers:
+    name: Test with ${{ matrix.sanitizer }} sanitizer
+    strategy:
+      fail-fast: false
+      matrix:
+        sanitizer: [address, leak]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Install deps
+      run: sudo apt-get install -y libelf-dev
+    - uses: dtolnay/rust-toolchain@nightly
+      with:
+        components: rustfmt
+    - uses: Swatinem/rust-cache@v2
+      with:
+        key: ${{ matrix.sanitizer }}
+    - name: Enable debug symbols
+      run: |
+          # to fix buggy leak analyzer:
+          # https://github.com/japaric/rust-san#unrealiable-leaksanitizer
+          sed -i '/\[features\]/i [profile.dev]' Cargo.toml
+          sed -i '/profile.dev/a opt-level = 1' Cargo.toml
+          cat Cargo.toml
+    - name: cargo test -Zsanitizer=${{ matrix.sanitizer }}
+      env:
+        # Exclude doctests for they don't seem to work well with ASAN.
+        CARGO_BUILD_RUSTDOC: true
+        # TODO: Ideally we'd set CFLAGS and CXXFLAGS as well, but CFLAGS
+        #       would apply to BPF C code.
+        #CFLAGS: "-fsanitize=${{ matrix.sanitizer }}"
+        #CXXFLAGS: "-fsanitize=${{ matrix.sanitizer }}"
+        RUSTFLAGS: "-Zsanitizer=${{ matrix.sanitizer }}"
+        ASAN_OPTIONS: "detect_odr_violation=0:detect_leaks=0"
+        LSAN_OPTIONS: ""
+      run: cargo test --locked --verbose --workspace --exclude runqslower --target x86_64-unknown-linux-gnu -- --skip ':root:' --skip ':asan_incompat:' --include-ignored
+    - name: cargo test -Zsanitizer=${{ matrix.sanitizer }} -- ':root:'
+      run: cd libbpf-rs && cargo test --locked --verbose --target x86_64-unknown-linux-gnu -- ':root:' --skip ':asan_incompat:'
 
   build-features:
     name: Build [${{ matrix.args }}]

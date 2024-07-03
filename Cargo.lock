@@ -292,6 +292,7 @@ dependencies = [
  "serde",
  "serde_json",
  "tempfile",
+ "test-tag",
  "vmlinux",
 ]
 

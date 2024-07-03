@@ -18,6 +18,7 @@ use memmap2::Mmap;
 use tempfile::tempdir;
 use tempfile::NamedTempFile;
 use tempfile::TempDir;
+use test_tag::tag;
 
 use crate::build::build;
 use crate::gen::btf::GenBtf;
@@ -288,6 +289,7 @@ fn test_build_workspace_collision() {
     build(true, Some(&workspace_cargo_toml), None, Vec::new(), true).unwrap_err();
 }
 
+#[tag(asan_incompat)]
 #[test]
 fn test_make_basic() {
     let (_dir, proj_dir, cargo_toml) = setup_temp_project();
@@ -322,6 +324,7 @@ fn test_make_basic() {
         .exists());
 }
 
+#[tag(asan_incompat)]
 #[test]
 fn test_make_workspace() {
     let (_dir, workspace_dir, workspace_cargo_toml, proj_one_dir, proj_two_dir) =
@@ -376,6 +379,7 @@ fn test_make_workspace() {
         .exists());
 }
 
+#[tag(asan_incompat)]
 #[test]
 fn test_skeleton_empty_source() {
     let (_dir, proj_dir, cargo_toml) = setup_temp_project();
@@ -452,6 +456,7 @@ fn test_skeleton_empty_source() {
     assert!(status.success());
 }
 
+#[tag(asan_incompat)]
 #[test]
 fn test_skeleton_basic() {
     let (_dir, proj_dir, cargo_toml) = setup_temp_project();
@@ -578,6 +583,7 @@ fn test_skeleton_basic() {
     assert!(status.success());
 }
 
+#[tag(asan_incompat)]
 #[test]
 fn test_skeleton_generate_datasec_static() {
     let (_dir, proj_dir, cargo_toml) = setup_temp_project();
@@ -625,6 +631,7 @@ fn test_skeleton_generate_datasec_static() {
     .unwrap();
 }
 
+#[tag(asan_incompat)]
 #[test]
 fn test_skeleton_datasec() {
     let (_dir, proj_dir, cargo_toml) = setup_temp_project();
@@ -938,6 +945,7 @@ fn test_skeleton_builder_clang_opts() {
         .unwrap();
 }
 
+#[tag(asan_incompat)]
 #[test]
 fn test_skeleton_builder_arrays_ptrs() {
     let (_dir, proj_dir, cargo_toml) = setup_temp_project();
@@ -1049,6 +1057,7 @@ fn test_skeleton_builder_arrays_ptrs() {
     assert!(status.success());
 }
 
+#[tag(asan_incompat)]
 #[test]
 fn test_skeleton_generate_struct_with_pointer() {
     let (_dir, proj_dir, cargo_toml) = setup_temp_project();
