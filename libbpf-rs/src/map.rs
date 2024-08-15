@@ -94,7 +94,7 @@ impl<'obj> OpenMap<'obj> {
     }
 
     /// Retrieve the initial value of the map.
-    pub fn initial_value(&self) -> Option<&[u8]> {
+    pub fn initial_value(&self) -> Option<&'obj [u8]> {
         let (ptr, size) = self.initial_value_raw();
         if ptr.is_null() {
             None
@@ -115,7 +115,7 @@ impl<'obj> OpenMapMut<'obj> {
     }
 
     /// Retrieve the initial value of the map.
-    pub fn initial_value_mut(&mut self) -> Option<&mut [u8]> {
+    pub fn initial_value_mut(&mut self) -> Option<&'obj mut [u8]> {
         let (ptr, size) = self.initial_value_raw();
         if ptr.is_null() {
             None

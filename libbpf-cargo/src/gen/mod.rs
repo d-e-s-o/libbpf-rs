@@ -495,14 +495,6 @@ fn gen_skel_map_defs(
     )?;
 
     for map in maps.iter() {
-        write!(
-            skel,
-            "\
-                            {name}: {name}.expect(\"map `{name}` not present\"),
-            ",
-            name = map.name
-        )?;
-
         if let MapMeta::Datasec {
             mmap_idx,
             read_only,
@@ -511,22 +503,42 @@ fn gen_skel_map_defs(
         {
             if !(open && not_openable) {
                 let ref_conv = if open || !read_only { "mut" } else { "ref" };
-                write!(
-                    skel,
-                    "\
-                                {name}_data: unsafe {{
-                                    config
-                                        .map_mmap_ptr({mmap_idx})
-                                        .expect(\"BPF map `{name}` does not have mmap pointer\")
-                                        .cast::<types::{name}>()
-                                        .as_{ref_conv}()
-                                        .expect(\"BPF map `{name}` mmap pointer is NULL\")
-                                }},
-                    ",
-                    name = map.name,
-                )?;
+                if open {
+                    write!(
+                        skel,
+                        "\
+                                    {name}_data: unsafe {{
+                                        transmute_map_data_checked({name}.as_mut().expect(\"map `{name}` not present\"))
+                                    }},
+                        ",
+                        name = map.name,
+                    )?;
+                } else {
+                    write!(
+                        skel,
+                        "\
+                                    {name}_data: unsafe {{
+                                        config
+                                            .map_mmap_ptr({mmap_idx})
+                                            .expect(\"BPF map `{name}` does not have mmap pointer\")
+                                            .cast::<types::{name}>()
+                                            .as_{ref_conv}()
+                                            .expect(\"BPF map `{name}` mmap pointer is NULL\")
+                                    }},
+                        ",
+                        name = map.name,
+                    )?;
+                }
             }
         }
+
+        write!(
+            skel,
+            "\
+                            {name}: {name}.expect(\"map `{name}` not present\"),
+            ",
+            name = map.name
+        )?;
     }
 
     write!(
@@ -882,6 +894,26 @@ fn gen_skel_contents(_debug: bool, raw_obj_name: &str, obj_file_path: &Path) -> 
         use libbpf_rs::skel::SkelBuilder;
         use libbpf_rs::AsRawLibbpf as _;
         use libbpf_rs::MapCore as _;
+
+        unsafe fn transmute_map_data_checked<'obj, T>(map: &mut libbpf_rs::OpenMapMut<'obj>) -> &'obj mut T {{
+            let data = match map.initial_value_mut() {{
+                Some(data) => data,
+                None => panic!(
+                    \"BPF map `{{:?}}` does not have initial value data\",
+                    map.name()
+                ),
+            }};
+            assert_eq!(
+                size_of::<T>(),
+                data.len(),
+                \"map `{{:?}}` data size ({{}}) does not match expected size ({{}})\",
+                map.name(),
+                data.len(),
+                size_of::<T>()
+            );
+
+            unsafe {{ data.as_mut_ptr().cast::<T>().as_mut().unwrap() }}
+        }}
         "
     )?;
 
