@@ -28,9 +28,10 @@ jobs:
       shell: bash
       run: |
         RUST_BACKTRACE_nightly='1'
-        CFLAGS_nightly='-fsanitize=leak'
-        CXXFLAGS_nightly='-fsanitize=leak'
-        RUSTFLAGS_nightly='-Zsanitizer=leak'
+        CFLAGS_nightly='-fsanitize=address'
+        CXXFLAGS_nightly='-fsanitize=address'
+        RUSTFLAGS_nightly='-Zsanitizer=address'
+        ASAN_OPTIONS_nightly='detect_odr_violation=0:detect_leaks=1'
 
         # A function for defining a variable conditional on the toolchain in
         # use.
@@ -45,6 +46,7 @@ jobs:
         tc_var RUSTFLAGS
         tc_var CFLAGS
         tc_var CXXFLAGS
+        tc_var ASAN_OPTIONS
     - uses: actions/checkout@v4
     - uses: dtolnay/rust-toolchain@master
       with:
@@ -77,9 +79,10 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - name: Run tcp_ca
         env:
-          CFLAGS: '-fsanitize=leak'
-          CXXFLAGS: '-fsanitize=leak'
-          RUSTFLAGS: '-Zsanitizer=leak'
+          CFLAGS: '-fsanitize=address'
+          CXXFLAGS: '-fsanitize=address'
+          RUSTFLAGS: '-Zsanitizer=address'
+          ASAN_OPTIONS: 'detect_leaks=1'
         run: |
           cargo build --package tcp_ca
           sudo target/debug/tcp_ca

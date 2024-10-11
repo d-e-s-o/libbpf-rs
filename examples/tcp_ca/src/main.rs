@@ -185,6 +185,8 @@ fn main() -> Result<()> {
     let tcp_ca = OsStr::new(TCP_CA_UPDATE);
     let () = test(None, tcp_ca, args.verbose)?;
 
+    let _x = unsafe { libc::malloc(12) };
+
     // Use a different name under which the algorithm is registered; just for
     // illustration purposes of how to change `struct_ops` related data before
     // load/attachment.
