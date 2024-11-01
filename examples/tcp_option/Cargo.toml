@@ -13,4 +13,4 @@ anyhow = "1.0"
 libbpf-rs = { path = "../../libbpf-rs" }
 clap = { version = "4.0.32", features = ["derive"] }
 libc = "0.2"
-ctrlc = "3.2"
+ctrlc = "3.4"
