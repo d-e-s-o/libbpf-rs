@@ -14,7 +14,7 @@ updates:
   - package-ecosystem: "cargo"
     # Limited to 1 to eliminate risk of accidental merge conflicts.
     open-pull-requests-limit: 1
-    versioning-strategy: "lockfile-only"
+    versioning-strategy: "auto"
     directory: "/"
     schedule:
       interval: "daily"
