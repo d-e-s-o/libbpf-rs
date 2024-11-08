@@ -90,7 +90,7 @@ dependencies = [
  "clap",
  "iced-x86",
  "libbpf-rs",
- "nix 0.28.0",
+ "nix 0.29.0",
 ]
 
 [[package]]
@@ -424,7 +424,6 @@ dependencies = [
  "cfg-if",
  "cfg_aliases 0.1.1",
  "libc",
- "memoffset",
 ]
 
 [[package]]
@@ -437,6 +436,7 @@ dependencies = [
  "cfg-if",
  "cfg_aliases 0.2.1",
  "libc",
+ "memoffset",
 ]
 
 [[package]]
@@ -796,7 +796,7 @@ dependencies = [
  "libbpf-cargo",
  "libbpf-rs",
  "libc",
- "nix 0.28.0",
+ "nix 0.29.0",
  "vmlinux",
 ]
 
@@ -910,7 +910,7 @@ dependencies = [
  "ctrlc",
  "libbpf-cargo",
  "libbpf-rs",
- "nix 0.28.0",
+ "nix 0.29.0",
  "vmlinux",
 ]
 
