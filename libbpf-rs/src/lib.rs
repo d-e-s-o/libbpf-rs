@@ -1,71 +1,21 @@
 //! # libbpf-rs
 //!
 //! **libbpf-rs** is a safe, idiomatic, and opinionated wrapper around
-//! [`libbpf`](https://github.com/libbpf/libbpf/).
+//! [`libbpf`](https://github.com/libbpf/libbpf/). It provides
+//! primitives and building blocks for loading and interacting with BPF
+//! kernel programs.
 //!
-//! **libbpf-rs**, together with **libbpf-cargo** (libbpf cargo plugin) allow you
-//! to write Compile-Once-Run-Everywhere (CO-RE) eBPF programs. Note this document
-//! uses "eBPF" and "BPF" interchangeably.
+//! **libbpf-rs** comes with a companion library and Cargo build system
+//! plugin, [**libbpf-cargo**][libbpf-cargo], which can be used for
+//! compiling BPF C code and generating a Rust "skeleton" based on it.
+//! In most scenarios and when you are starting from scratch,
+//! **libbpf-cargo** is where you should begin your journey.
 //!
-//! More information about CO-RE is [available
-//! here](https://nakryiko.com/posts/bpf-portability-and-co-re/).
+//! Additionally, please refer to the various [examples][] combining
+//! both libraries and illustrating various workflows.
 //!
-//! ## High level workflow
-//!
-//! 1. Create new rust project (via `cargo new` or similar) at path `$PROJ_PATH`
-//! 2. Create directory `$PROJ_PATH/src/bpf`
-//! 3. Write CO-RE bpf code in `$PROJ_PATH/src/bpf/${MYFILE}.bpf.c`, where `$MYFILE` may be any
-//!    valid filename. Note the `.bpf.c` extension is required.
-//! 4. Create a [build script](https://doc.rust-lang.org/cargo/reference/build-scripts.html) that
-//!    builds and generates a skeleton module using `libbpf_cargo::SkeletonBuilder`
-//! 5. Write your userspace code by importing and using the generated module. Import the
-//!    module by using the [path
-//!    attribute](https://doc.rust-lang.org/reference/items/modules.html#the-path-attribute).
-//!    Your userspace code goes in `$PROJ_PATH/src/` as it would in a normal rust project.
-//! 6. Continue regular Cargo workflow (i.e., `cargo build`, `cargo run`, etc)
-//!
-//! ## Alternate workflow
-//!
-//! While using the skeleton is recommended, it is also possible to directly use **libbpf-rs**.
-//!
-//! 1. Follow steps 1-3 of "High level workflow"
-//! 2. Generate a BPF object file. Options include manually invoking `clang`, creating a build
-//!    script to invoke `clang`, or using **libbpf-cargo** cargo plugins.
-//! 3. Write your userspace code in `$PROJ_PATH/src/` as you would a normal rust project and point
-//!    **libbpf-rs** at your BPF object file
-//! 4. Continue regular rust workflow (ie `cargo build`, `cargo run`, etc)
-//!
-//! ## Design
-//!
-//! **libbpf-rs** models various "phases":
-//! ```text
-//!                from_*()        load()
-//!                  |               |
-//!                  v               v
-//!    ObjectBuilder ->  OpenObject  -> Object
-//!                          ^            ^
-//!                          |            |
-//!              <pre-load modifications> |
-//!                                       |
-//!                            <post-load interactions>
-//! ```
-//!
-//! The entry point into **libbpf-rs** is [`ObjectBuilder`]. `ObjectBuilder` helps open the BPF
-//! object file. After the object file is opened, you are returned an [`OpenObject`] where you can
-//! perform all your pre-load operations. Pre-load means before any BPF maps are created or BPF
-//! programs are loaded and verified by the kernel. Finally, after the BPF object is loaded, you
-//! are returned an [`Object`] instance where you can read/write to BPF maps, attach BPF programs
-//! to hooks, etc.
-//!
-//! You _must_ keep the [`Object`] alive the entire duration you interact with anything inside the
-//! BPF object it represents. This is further documented in [`Object`] documentation.
-//!
-//! ## Example
-//!
-//! This is probably the best way to understand how **libbpf-rs** and **libbpf-cargo** work
-//! together.
-//!
-//! [See example here](https://github.com/libbpf/libbpf-rs/tree/master/examples/runqslower).
+//! [libbpf-cargo]: https://docs.rs/libbpf-cargo
+//! [examples]: https://github.com/libbpf/libbpf-rs/tree/master/examples
 
 #![allow(clippy::let_and_return, clippy::let_unit_value)]
 #![warn(

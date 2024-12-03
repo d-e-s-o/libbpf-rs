@@ -101,7 +101,13 @@ pub trait AsRawLibbpf {
     fn as_libbpf_object(&self) -> NonNull<Self::LibbpfType>;
 }
 
-/// Builder for creating an [`OpenObject`]. Typically the entry point into **libbpf-rs**.
+/// Builder for creating an [`OpenObject`].
+///
+/// This is typically the entry point into **libbpf-rs**.
+///
+/// Please refer to the [`Object`] type and its documentation for
+/// explanations of high-level workflows and relations between types as
+/// well as interactions between objects.
 #[derive(Debug)]
 pub struct ObjectBuilder {
     name: Option<CString>,
@@ -216,6 +222,10 @@ impl AsRawLibbpf for ObjectBuilder {
 /// Represents an opened (but not yet loaded) BPF object file.
 ///
 /// Use this object to access [`OpenMap`]s and [`OpenProgram`]s.
+///
+/// Please refer to the [`Object`] type and its documentation for
+/// explanations of high-level workflows and relations between types as
+/// well as interactions between objects.
 #[derive(Debug)]
 #[repr(transparent)]
 pub struct OpenObject {
@@ -316,13 +326,35 @@ impl Drop for OpenObject {
 
 /// Represents a loaded BPF object file.
 ///
-/// An `Object` is logically in charge of all the contained [`Program`]s and [`Map`]s as well as
-/// the associated metadata and runtime state that underpins the userspace portions of BPF program
-/// execution. As a **libbpf-rs** user, you must keep the `Object` alive during the entire lifetime
-/// of your interaction with anything inside the `Object`.
+/// An `Object` is logically in charge of all the contained [`Program`]s
+/// and [`Map`]s as well as the associated metadata and runtime state
+/// that underpins the userspace portions of BPF program execution.
+/// BPF objects typically undergo different phases, as illustrated here:
+/// ```text
+///                from_*()        load()
+///                  |               |
+///                  v               v
+///    ObjectBuilder ->  OpenObject  -> Object
+///                          ^            ^
+///                          |            |
+///              <pre-load modifications> |
+///                                       |
+///                            <post-load interactions>
+/// ```
 ///
-/// Note that this is an explanation of the motivation -- Rust's lifetime system should already be
-/// enforcing this invariant.
+/// The entry point into **libbpf-rs** is [`ObjectBuilder`].
+/// `ObjectBuilder` helps open the BPF object file. After the object
+/// file is opened, you are returned an [`OpenObject`] on which you can
+/// perform all your pre-load operations. "Pre-load" refers to the fact
+/// that BPF maps are not yet created and BPF programs not yet loaded
+/// and verified by the kernel. Finally, after the BPF object is loaded,
+/// you are returned an [`Object`] instance that allows you to
+/// read/write to/from BPF maps, attach BPF programs to hooks, etc.
+///
+/// In a nutshell, an [`Object`] encapsulates the BPF state users are
+/// likely to be interested in and once the instance is destroyed,
+/// associated resources (including those allocated in the kernel) are
+/// released.
 #[derive(Debug)]
 #[repr(transparent)]
 pub struct Object {
