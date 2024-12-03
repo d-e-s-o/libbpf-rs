@@ -1,6 +1,6 @@
-//! libbpf-cargo helps you develop and build eBPF (BPF) programs with standard rust tooling.
+//! **libbpf-cargo** helps you develop and build eBPF (BPF) programs with standard rust tooling.
 //!
-//! libbpf-cargo supports two interfaces:
+//! **libbpf-cargo** supports two interfaces:
 //! * [`SkeletonBuilder`] API, for use with [build scripts](https://doc.rust-lang.org/cargo/reference/build-scripts.html)
 //! * `cargo-libbpf` cargo subcommand, for use with `cargo`
 //!
@@ -31,7 +31,7 @@
 //!
 //! `cargo libbpf build` compiles `<NAME>.bpf.c` C files into corresponding `<NAME>.bpf.o` ELF
 //! object files. Each object file may contain one or more BPF programs, maps, and associated
-//! metadata. The object file may then be handed over to `libbpf-rs` for loading and interaction.
+//! metadata. The object file may then be handed over to **libbpf-rs** for loading and interaction.
 //!
 //! cargo-libbpf-build enforces a few conventions:
 //!

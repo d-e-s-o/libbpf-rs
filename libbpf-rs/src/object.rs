@@ -101,7 +101,7 @@ pub trait AsRawLibbpf {
     fn as_libbpf_object(&self) -> NonNull<Self::LibbpfType>;
 }
 
-/// Builder for creating an [`OpenObject`]. Typically the entry point into libbpf-rs.
+/// Builder for creating an [`OpenObject`]. Typically the entry point into **libbpf-rs**.
 #[derive(Debug)]
 pub struct ObjectBuilder {
     name: Option<CString>,
@@ -318,7 +318,7 @@ impl Drop for OpenObject {
 ///
 /// An `Object` is logically in charge of all the contained [`Program`]s and [`Map`]s as well as
 /// the associated metadata and runtime state that underpins the userspace portions of BPF program
-/// execution. As a libbpf-rs user, you must keep the `Object` alive during the entire lifetime
+/// execution. As a **libbpf-rs** user, you must keep the `Object` alive during the entire lifetime
 /// of your interaction with anything inside the `Object`.
 ///
 /// Note that this is an explanation of the motivation -- Rust's lifetime system should already be

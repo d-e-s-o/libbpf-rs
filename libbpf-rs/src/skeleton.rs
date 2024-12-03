@@ -352,7 +352,7 @@ pub trait SkelBuilder<'obj> {
 ///
 /// The type of the value returned by each of these methods will be specific to your BPF program.
 /// A common convention is to define a single global variable in the BPF program with a struct type
-/// containing a field for each configuration parameter <sup>\[[source]\]</sup>. libbpf-rs
+/// containing a field for each configuration parameter <sup>\[[source]\]</sup>. **libbpf-rs**
 /// auto-generates this pattern for you without you having to define such a struct type in your BPF
 /// program. It does this by examining each of the global variables in your BPF program's `.bss`,
 /// `.data`, and `.rodata` sections and then creating Rust struct types. Since these struct types
@@ -362,7 +362,7 @@ pub trait SkelBuilder<'obj> {
 /// rust source file. The use of these methods can also be seen in the examples 'capable',
 /// 'runqslower', and 'tproxy'.
 ///
-/// If you ever doubt whether libbpf-rs has placed a particular variable in the correct struct
+/// If you ever doubt whether **libbpf-rs** has placed a particular variable in the correct struct
 /// type, you can see which section each global variable is stored in by examining the output of
 /// the following command (after a successful build):
 ///

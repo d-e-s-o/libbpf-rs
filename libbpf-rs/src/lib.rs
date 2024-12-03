@@ -1,9 +1,9 @@
 //! # libbpf-rs
 //!
-//! `libbpf-rs` is a safe, idiomatic, and opinionated wrapper around
-//! [libbpf](https://github.com/libbpf/libbpf/).
+//! **libbpf-rs** is a safe, idiomatic, and opinionated wrapper around
+//! [`libbpf`](https://github.com/libbpf/libbpf/).
 //!
-//! libbpf-rs, together with `libbpf-cargo` (libbpf cargo plugin) allow you
+//! **libbpf-rs**, together with **libbpf-cargo** (libbpf cargo plugin) allow you
 //! to write Compile-Once-Run-Everywhere (CO-RE) eBPF programs. Note this document
 //! uses "eBPF" and "BPF" interchangeably.
 //!
@@ -26,18 +26,18 @@
 //!
 //! ## Alternate workflow
 //!
-//! While using the skeleton is recommended, it is also possible to directly use libbpf-rs.
+//! While using the skeleton is recommended, it is also possible to directly use **libbpf-rs**.
 //!
 //! 1. Follow steps 1-3 of "High level workflow"
 //! 2. Generate a BPF object file. Options include manually invoking `clang`, creating a build
-//!    script to invoke `clang`, or using `libbpf-cargo` cargo plugins.
+//!    script to invoke `clang`, or using **libbpf-cargo** cargo plugins.
 //! 3. Write your userspace code in `$PROJ_PATH/src/` as you would a normal rust project and point
-//!    libbpf-rs at your BPF object file
+//!    **libbpf-rs** at your BPF object file
 //! 4. Continue regular rust workflow (ie `cargo build`, `cargo run`, etc)
 //!
 //! ## Design
 //!
-//! libbpf-rs models various "phases":
+//! **libbpf-rs** models various "phases":
 //! ```text
 //!                from_*()        load()
 //!                  |               |
@@ -50,8 +50,8 @@
 //!                            <post-load interactions>
 //! ```
 //!
-//! The entry point into libbpf-rs is [`ObjectBuilder`]. `ObjectBuilder` helps open the BPF object
-//! file. After the object file is opened, you are returned an [`OpenObject`] where you can
+//! The entry point into **libbpf-rs** is [`ObjectBuilder`]. `ObjectBuilder` helps open the BPF
+//! object file. After the object file is opened, you are returned an [`OpenObject`] where you can
 //! perform all your pre-load operations. Pre-load means before any BPF maps are created or BPF
 //! programs are loaded and verified by the kernel. Finally, after the BPF object is loaded, you
 //! are returned an [`Object`] instance where you can read/write to BPF maps, attach BPF programs
@@ -62,7 +62,8 @@
 //!
 //! ## Example
 //!
-//! This is probably the best way to understand how libbpf-rs and libbpf-cargo work together.
+//! This is probably the best way to understand how **libbpf-rs** and **libbpf-cargo** work
+//! together.
 //!
 //! [See example here](https://github.com/libbpf/libbpf-rs/tree/master/examples/runqslower).
 
