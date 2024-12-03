@@ -22,17 +22,6 @@
 //!    Your userspace code goes in `$PROJ_PATH/src/` as it would in a normal rust project.
 //! 6. Continue regular Cargo workflow (i.e., `cargo build`, `cargo run`, etc)
 //!
-//! ## Alternate workflow
-//!
-//! While using the skeleton is recommended, it is also possible to directly use **libbpf-rs**.
-//!
-//! 1. Follow steps 1-3 of "High level workflow"
-//! 2. Generate a BPF object file. Options include manually invoking `clang`, creating a build
-//!    script to invoke `clang`, or using **libbpf-cargo** cargo plugins.
-//! 3. Write your userspace code in `$PROJ_PATH/src/` as you would a normal rust project and point
-//!    **libbpf-rs** at your BPF object file
-//! 4. Continue regular Cargo workflow (i.e., `cargo build`, `cargo run`, etc)
-//!
 //! **libbpf-cargo** supports two interfaces:
 //! * [`SkeletonBuilder`] API, for use with [build scripts](https://doc.rust-lang.org/cargo/reference/build-scripts.html)
 //! * `cargo-libbpf` cargo subcommand, for use with `cargo`
