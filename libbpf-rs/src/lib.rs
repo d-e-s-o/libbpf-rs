@@ -22,7 +22,7 @@
 //!    module by using the [path
 //!    attribute](https://doc.rust-lang.org/reference/items/modules.html#the-path-attribute).
 //!    Your userspace code goes in `$PROJ_PATH/src/` as it would in a normal rust project.
-//! 6. Continue regular rust workflow (ie `cargo build`, `cargo run`, etc)
+//! 6. Continue regular Cargo workflow (i.e., `cargo build`, `cargo run`, etc)
 //!
 //! ## Alternate workflow
 //!
