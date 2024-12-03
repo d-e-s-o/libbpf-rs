@@ -8,7 +8,7 @@
 //! uses "eBPF" and "BPF" interchangeably.
 //!
 //! More information about CO-RE is [available
-//! here](https://facebookmicrosites.github.io/bpf/blog/2020/02/19/bpf-portability-and-co-re.html).
+//! here](https://nakryiko.com/posts/bpf-portability-and-co-re/).
 //!
 //! ## High level workflow
 //!
