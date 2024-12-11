@@ -168,7 +168,6 @@ jobs:
           targets: aarch64-unknown-linux-gnu
       - name: Install deps
         run: |
-          sudo apt-get update
           sudo apt-get install -y libelf-dev:arm64 zlib1g-dev:arm64 gcc-aarch64-linux-gnu
       - uses: Swatinem/rust-cache@v2
       - name: Build
@@ -196,7 +195,6 @@ jobs:
           targets: armv7-unknown-linux-gnueabihf
       - name: Install deps
         run: |
-          sudo apt-get update
           sudo apt-get install -y libelf-dev:armhf zlib1g-dev:armhf gcc-arm-linux-gnueabihf
       - uses: Swatinem/rust-cache@v2
       - name: Build
