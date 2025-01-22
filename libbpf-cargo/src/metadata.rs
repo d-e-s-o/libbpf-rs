@@ -135,9 +135,15 @@ fn get_package(package: &Package, workspace_target_dir: &Path) -> Result<Vec<Unp
 pub(crate) fn get(manifest_path: Option<&Path>) -> Result<(PathBuf, Vec<UnprocessedObj>)> {
     let mut cmd = MetadataCommand::new();
 
-    if let Some(path) = manifest_path {
+    let manifest_path = if let Some(path) = manifest_path {
+        let normalized = path
+            .canonicalize()
+            .with_context(|| format!("failed to canonicalize path `{}`", path.display()))?;
         cmd.manifest_path(path);
-    }
+        Some(normalized)
+    } else {
+        None
+    };
 
     let metadata = cmd.exec().context("Failed to get cargo metadata")?;
     if metadata.workspace_members.is_empty() {
@@ -148,7 +154,10 @@ pub(crate) fn get(manifest_path: Option<&Path>) -> Result<(PathBuf, Vec<Unproces
     let mut v: Vec<UnprocessedObj> = Vec::new();
     for id in &metadata.workspace_members {
         for package in &metadata.packages {
-            if id == &package.id {
+            if id == &package.id
+                && (manifest_path.is_none()
+                    || Some(package.manifest_path.as_std_path()) == manifest_path.as_deref())
+            {
                 let vv = &mut get_package(package, target_directory)
                     .with_context(|| format!("Failed to process package={}", package.name))?;
                 let () = v.append(vv);
