@@ -13,6 +13,7 @@ use anyhow::bail;
 use anyhow::Context;
 use anyhow::Result;
 use log::debug;
+use log::info;
 use tempfile::tempdir;
 
 use crate::metadata;
@@ -73,6 +74,8 @@ impl BpfObjBuilder {
             .arg("-o")
             .arg(dst);
 
+        debug!("Running: `{}`", format_command(&cmd));
+
         let output = cmd
             .output()
             .with_context(|| format!("failed to execute `{}`", compiler.display()))?;
@@ -89,6 +92,16 @@ impl BpfObjBuilder {
                     format!("failed to compile {} from {}", dst.display(), src.display())
                 });
             return err;
+        }
+
+        if !output.stdout.is_empty() {
+            let stdout = String::from_utf8_lossy(&output.stdout);
+            info!(target: "compiler-stdout", "{stdout}");
+        }
+
+        if !output.stderr.is_empty() {
+            let stderr = String::from_utf8_lossy(&output.stderr);
+            info!(target: "compiler-stderr", "{stderr}");
         }
         Ok(())
     }
