@@ -262,5 +262,4 @@ jobs:
     if: always()
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
       - run: echo '${{ toJSON(needs) }}' | jq -e 'to_entries | all(.value.result == "success")'
