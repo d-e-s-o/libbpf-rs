@@ -46,21 +46,8 @@ fn process_sample(ring: c_int, data: &[u8]) -> i32 {
 fn main() -> Result<()> {
     let skel_builder = RingbufMultiSkelBuilder::default();
     let mut open_object = MaybeUninit::uninit();
-    let mut open_skel = skel_builder.open(&mut open_object)?;
-
-    let entries = open_skel.maps.ringbuf1.max_entries();
-    let mut opts = libbpf_rs::libbpf_sys::bpf_map_create_opts::default();
-    opts.sz = size_of_val(&opts) as _;
-    let map =
-        MapHandle::create(MapType::RingBuf, Some("ringbuf_hash"), 0, 0, entries, &opts).unwrap();
-    let () = open_skel
-        .maps
-        .ringbuf_hash
-        .set_inner_map_fd(map.as_fd())
-        .unwrap();
-
+    let open_skel = skel_builder.open(&mut open_object)?;
     let mut skel = open_skel.load()?;
-    drop(map);
 
     // Only trigger BPF program for current process.
     let pid = unsafe { libc::getpid() };
