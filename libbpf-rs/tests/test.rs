@@ -13,6 +13,7 @@ use std::fs;
 use std::hint;
 use std::io;
 use std::io::Read;
+use std::mem;
 use std::mem::size_of;
 use std::mem::size_of_val;
 use std::os::unix::io::AsFd;
@@ -24,6 +25,7 @@ use std::slice;
 use std::sync::atomic::AtomicI32;
 use std::sync::atomic::Ordering;
 use std::sync::mpsc::channel;
+use std::thread::sleep;
 use std::time::Duration;
 
 use libbpf_rs::num_possible_cpus;
@@ -1802,6 +1804,117 @@ fn test_object_raw_tracepoint_with_opts() {
     let result = with_ringbuffer(&map, action);
 
     assert_eq!(result, cookie_val.into());
+}
+
+#[repr(C)]
+pub union sample_un {
+    pub sample_period: u64,
+    pub sample_freq: u64,
+}
+
+#[repr(C)]
+struct perf_event_attr {
+    _type: u32,
+    size: u32,
+    config: u64,
+    sample: sample_un,
+    sample_type: u64,
+    read_format: u64,
+    flags: u64,
+    wakeup: u64,
+    bp_type: u32,
+    bp_1: u64,
+    bp_2: u64,
+    branch_sample_type: u64,
+    sample_regs_user: u64,
+    sample_stack_user: u32,
+    clockid: i32,
+    sample_regs_intr: u64,
+    aux_watermark: u32,
+    sample_max_stack: u16,
+    __reserved_2: u16,
+    aux_sample_size: u32,
+    __reserved_3: u32,
+}
+
+impl Default for perf_event_attr {
+    fn default() -> Self {
+        unsafe { mem::zeroed() }
+    }
+}
+
+const PERF_TYPE_SOFTWARE: u32 = 1;
+const PERF_COUNT_SW_CPU_CLOCK: u64 = 0;
+
+extern "C" {
+    fn syscall(number: libc::c_long, ...) -> libc::c_long;
+}
+
+fn perf_event_open(
+    hw_event: &perf_event_attr,
+    pid: libc::pid_t,
+    cpu: libc::c_int,
+    group_fd: libc::c_int,
+    flags: libc::c_ulong,
+) -> libc::c_long {
+    unsafe {
+        syscall(
+            libc::SYS_perf_event_open,
+            hw_event as *const perf_event_attr,
+            pid,
+            cpu,
+            group_fd,
+            flags,
+        )
+    }
+}
+
+fn init_perf_event() -> i32 {
+    let pid = 0;
+    let cpu = -1;
+    let attr = perf_event_attr {
+        _type: PERF_TYPE_SOFTWARE,
+        size: mem::size_of::<perf_event_attr>() as u32,
+        config: PERF_COUNT_SW_CPU_CLOCK,
+        sample: sample_un { sample_freq: 1000 },
+        flags: 1 << 10, // freq = 1
+        ..Default::default()
+    };
+    let rc = perf_event_open(&attr, pid, cpu, -1, 0);
+    assert_ne!(rc, -1);
+    rc as _
+}
+
+/// Check that we can attach a BPF program to a uprobe.
+#[tag(root)]
+#[test]
+fn test_object_perf_event() {
+    let mut obj = get_test_object("perf_event.bpf.o");
+    let prog = get_prog_mut(&mut obj, "handle__perf_event");
+
+    let fd = init_perf_event();
+    defer! {
+        let _ = unsafe { libc::close(fd) };
+    }
+
+    let _link = prog.attach_perf_event(fd).expect("failed to attach prog");
+
+    let map = get_map_mut(&mut obj, "ringbuf");
+    let mut value = 0i32;
+    {
+        let callback = |data: &[u8]| {
+            plain::copy_from_bytes(&mut value, data).expect("Wrong size");
+            0
+        };
+
+        let mut builder = libbpf_rs::RingBufferBuilder::new();
+        builder.add(&map, callback).expect("failed to add ringbuf");
+        let mgr = builder.build().expect("failed to build");
+
+        mgr.poll(Duration::from_millis(100)).unwrap();
+        mgr.consume().expect("failed to consume ringbuf");
+    }
+    assert_eq!(value, 1);
 }
 
 #[inline(never)]
