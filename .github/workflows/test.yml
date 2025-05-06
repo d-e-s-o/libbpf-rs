@@ -99,12 +99,14 @@ jobs:
           - args: "features = ['vendored']"
           - args: "features = ['static']"
           - args: "default-features = false"
+    env:
+      LIBBPF_SYS_EXTRA_CFLAGS: "-lzstd"
     steps:
       - uses: actions/checkout@v4
       - name: Install deps
         run: |
           sudo apt-get update
-          sudo apt-get install --yes --no-install-recommends libelf-dev autopoint libbpf-dev
+          sudo apt-get install --yes --no-install-recommends libbpf-dev libelf-dev libzstd-dev autopoint
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - name: Build libbpf-rs sample
