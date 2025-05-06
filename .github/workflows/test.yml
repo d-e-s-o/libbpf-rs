@@ -98,15 +98,13 @@ jobs:
         include:
           - args: "features = ['vendored']"
           - args: "features = ['static']"
-          # TODO: Should build without features, but that requires system
-          #       libbpf and ubuntu 22.04 only has 0.5 (..?)
-          #- args: "default-features = false"
+          - args: "default-features = false"
     steps:
       - uses: actions/checkout@v4
       - name: Install deps
         run: |
           sudo apt-get update
-          sudo apt-get install --yes --no-install-recommends libelf-dev autopoint
+          sudo apt-get install --yes --no-install-recommends libelf-dev autopoint libbpf-dev
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - name: Build libbpf-rs sample
