@@ -352,7 +352,13 @@ fn gen_skel_c_skel_constructor(skel: &mut String, object: &Object, name: &str) -
             "false"
         };
 
-        writeln!(skel, ".map(\"{raw_name}\", {mmaped})")?;
+        let populate_link = if map.map_type() == MapType::StructOps {
+            "true"
+        } else {
+            "false"
+        };
+
+        writeln!(skel, ".map(\"{raw_name}\", {mmaped}, {populate_link})")?;
     }
 
     for prog in object.progs() {

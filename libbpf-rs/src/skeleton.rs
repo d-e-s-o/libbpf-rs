@@ -32,6 +32,7 @@ use crate::Result;
 struct MapSkelConfig {
     name: String,
     map: Box<*mut bpf_map>,
+    link: Option<Box<*mut bpf_link>>,
     mmaped: Option<Box<*mut c_void>>,
 }
 
@@ -64,9 +65,6 @@ impl<'dat> ObjectSkeletonConfigBuilder<'dat> {
     /// Construct a new instance
     ///
     /// `object_data` is the contents of the `.o` from clang
-    ///
-    /// `p` is a reference to the pointer where `libbpf_sys::bpf_object` should be
-    /// stored/retrieved
     pub fn new(object_data: &'dat [u8]) -> Self {
         Self {
             data: object_data,
@@ -86,8 +84,14 @@ impl<'dat> ObjectSkeletonConfigBuilder<'dat> {
     /// Adds a map to the config
     ///
     /// Set `mmaped` to `true` if the map is mmap'able to userspace
-    pub fn map<T: AsRef<str>>(&mut self, name: T, mmaped: bool) -> &mut Self {
-        let m = if mmaped {
+    pub fn map<T: AsRef<str>>(&mut self, name: T, mmaped: bool, populate_link: bool) -> &mut Self {
+        let mmaped = if mmaped {
+            Some(Box::new(ptr::null_mut()))
+        } else {
+            None
+        };
+
+        let link = if populate_link {
             Some(Box::new(ptr::null_mut()))
         } else {
             None
@@ -96,7 +100,8 @@ impl<'dat> ObjectSkeletonConfigBuilder<'dat> {
         self.maps.push(MapSkelConfig {
             name: name.as_ref().to_string(),
             map: Box::new(ptr::null_mut()),
-            mmaped: m,
+            link,
+            mmaped,
         });
 
         self
@@ -138,6 +143,9 @@ impl<'dat> ObjectSkeletonConfigBuilder<'dat> {
                 (*current_map).name = str_to_cstring_and_pool(&map.name, string_pool)
                     .expect("Invalid unicode in map name");
                 (*current_map).map = &mut *map.map;
+                if let Some(link) = &mut map.link {
+                    (*current_map).link = &mut **link;
+                }
                 (*current_map).mmaped = if let Some(ref mut mmaped) = map.mmaped {
                     &mut **mmaped
                 } else {
