@@ -369,10 +369,10 @@ fn escape_reserved_keyword(identifier: Cow<'_, str>) -> Cow<'_, str> {
 }
 
 #[derive(Debug, Clone)]
-pub struct BtfDependency {
-    pub name: Option<String>,
-    pub dep_id: i32,
-    pub child_counter: Rc<RefCell<i32>>,
+struct BtfDependency {
+    name: Option<String>,
+    dep_id: i32,
+    child_counter: Rc<RefCell<i32>>,
 }
 
 #[derive(Debug, Default)]
@@ -390,48 +390,37 @@ pub(crate) struct TypeMap {
 }
 
 impl TypeMap {
-    pub fn derive_parent<'s>(&self, ty: &BtfType<'s>, parent: &BtfType<'s>) {
+    fn derive_parent<'s>(&self, ty: &BtfType<'s>, parent: &BtfType<'s>) {
         let mut deps = self.dependencies.borrow_mut();
         if deps.get(&ty.type_id()).is_some() {
             return;
         }
 
-        let parent_dep = deps.get(&parent.type_id());
-        if let Some(pdep) = parent_dep {
+        let dep = if let Some(pdep) = deps.get(&parent.type_id()) {
             let mut dep = pdep.clone();
 
             if let Some(n) = parent.name() {
                 dep.name = Some(n.to_string_lossy().to_string());
             }
-            if ty.name().is_some() {
-                dep.child_counter = Rc::new(RefCell::new(0));
-            }
 
-            let parent_counter = Rc::<RefCell<i32>>::clone(&pdep.child_counter);
+            let parent_counter = Rc::clone(&pdep.child_counter);
             *parent_counter.borrow_mut() += 1;
             dep.dep_id = *parent_counter.borrow();
-
-            deps.insert(ty.type_id(), dep);
+            dep
         } else {
-            let mut dep = BtfDependency {
-                name: None,
-                dep_id: 0,
+            let dep = BtfDependency {
+                name: parent.name().map(|n| n.to_string_lossy().to_string()),
+                dep_id: 1,
                 child_counter: Rc::new(RefCell::new(1)),
             };
             deps.insert(parent.type_id(), dep.clone());
+            dep
+        };
 
-            if let Some(n) = parent.name() {
-                dep.name = Some(n.to_string_lossy().to_string());
-            }
-            if ty.name().is_some() {
-                dep.child_counter = Rc::new(RefCell::new(0));
-            }
-            dep.dep_id = 1;
-            deps.insert(ty.type_id(), dep);
-        }
+        deps.insert(ty.type_id(), dep);
     }
 
-    pub fn lookup_parent<'s>(&self, ty: &BtfType<'s>) -> Option<BtfDependency> {
+    fn lookup_parent<'s>(&self, ty: &BtfType<'s>) -> Option<BtfDependency> {
         self.dependencies.borrow().get(&ty.type_id()).cloned()
     }
 
