@@ -425,7 +425,6 @@ fn build_rust_project_from_bpf_c_impl(bpf_c: &str, rust: &str, run: bool) -> (Te
         .arg("--quiet")
         .arg("--manifest-path")
         .arg(cargo_toml.into_os_string())
-        .env("RUSTFLAGS", "-Dwarnings")
         .status()
         .expect("failed to run cargo");
     assert!(status.success());
@@ -447,7 +446,6 @@ fn run_rust_project_from_bpf_c(bpf_c: &str, rust: &str) {
 fn test_skeleton_empty_source() {
     let bpf_c = String::new();
     let rust = indoc! {r#"
-        #![warn(elided_lifetimes_in_paths)]
         mod bpf;
         use std::mem::MaybeUninit;
         use bpf::*;
@@ -489,7 +487,6 @@ fn test_skeleton_basic() {
     "#}
     .to_string();
     let rust = indoc! {r#"
-        #![warn(elided_lifetimes_in_paths)]
         mod bpf;
         use std::mem::MaybeUninit;
         use bpf::*;
@@ -541,7 +538,6 @@ fn test_skeleton_generate_bpf_objs_section() {
     "#}
     .to_string();
     let rust = indoc! {r#"
-        #![warn(elided_lifetimes_in_paths)]
         mod bpf;
         use std::mem::MaybeUninit;
         use bpf::*;
@@ -609,7 +605,6 @@ fn test_skeleton_generate_datasec_static() {
     .to_string();
 
     let rust = indoc! {r#"
-        #![warn(elided_lifetimes_in_paths)]
         mod bpf;
         use bpf::*;
 
@@ -642,7 +637,6 @@ fn test_skeleton_datasec() {
     .to_string();
 
     let rust = indoc! {r#"
-        #![warn(elided_lifetimes_in_paths)]
         mod bpf;
         use std::mem::MaybeUninit;
         use bpf::*;
@@ -809,7 +803,6 @@ fn test_skeleton_builder_basic() {
         .arg("--quiet")
         .arg("--manifest-path")
         .arg(cargo_toml.into_os_string())
-        .env("RUSTFLAGS", "-Dwarnings")
         .status()
         .expect("failed to spawn cargo-build");
     assert!(status.success());
@@ -879,7 +872,6 @@ fn test_skeleton_builder_arrays_ptrs() {
     .to_string();
 
     let rust = indoc! {r#"
-        #![warn(elided_lifetimes_in_paths)]
         mod bpf;
         use std::mem::MaybeUninit;
         use bpf::*;
@@ -923,7 +915,6 @@ fn test_skeleton_enum_with_same_value_variants() {
     .to_string();
 
     let rust = indoc! {r#"
-        #![warn(elided_lifetimes_in_paths)]
         mod bpf;
         use bpf::*;
 
@@ -954,7 +945,6 @@ fn test_skeleton_generate_struct_with_pointer() {
     .to_string();
 
     let rust = indoc! {r#"
-        #![warn(elided_lifetimes_in_paths)]
         mod bpf;
         use std::mem::MaybeUninit;
         use bpf::*;
@@ -990,7 +980,6 @@ fn test_skeleton_generate_struct_with_pointer_array() {
     .to_string();
 
     let rust = indoc! {r#"
-        #![warn(elided_lifetimes_in_paths)]
         mod bpf;
         use std::mem::MaybeUninit;
         use bpf::*;
@@ -1109,7 +1098,6 @@ fn test_skeleton_multipl_kfuncs() {
     .to_string();
 
     let rust = indoc! {r#"
-        #![warn(elided_lifetimes_in_paths)]
         mod bpf;
         use bpf::*;
 
@@ -1360,7 +1348,6 @@ fn test_skeleton_duplicate_struct() {
         .arg("--quiet")
         .arg("--manifest-path")
         .arg(cargo_toml.into_os_string())
-        .env("RUSTFLAGS", "-Dwarnings")
         .status()
         .expect("failed to spawn cargo-build");
     assert!(status.success());

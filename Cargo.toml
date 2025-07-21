@@ -28,6 +28,7 @@ resolver = "2"
 
 [workspace.lints.rust]
 deprecated-safe = "warn"
+elided-lifetimes-in-paths = "warn"
 future-incompatible = "warn"
 keyword-idents = "warn"
 let-underscore = "warn"
