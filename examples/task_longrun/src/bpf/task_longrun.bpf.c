@@ -8,7 +8,8 @@ struct event _event = {0};
 
 struct {
     __uint(type, BPF_MAP_TYPE_STACK_TRACE);
-    __uint(key_size, sizeof(u32));
+    __type(key, u32);
+    /* bpflint: disable=untyped-map-member */
     __uint(value_size, PERF_MAX_STACK_DEPTH * sizeof(u64));
     __uint(max_entries, __NR_STACKS__);
 } stacks SEC(".maps");
@@ -22,8 +23,8 @@ struct {
 
 struct {
     __uint(type, BPF_MAP_TYPE_PERF_EVENT_ARRAY);
-    __uint(key_size, sizeof(u32));
-    __uint(value_size, sizeof(u32));
+    __type(key, u32);
+    __type(value, u32);
 } events SEC(".maps");
 
 SEC("tp_btf/sched_switch")
