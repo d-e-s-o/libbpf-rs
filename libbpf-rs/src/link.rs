@@ -19,6 +19,7 @@ use crate::Result;
 /// when this object is dropped if nothing else is holding a reference count.
 #[derive(Debug)]
 #[must_use = "not using this `Link` will detach the underlying program immediately"]
+#[doc(alias = "bpf_link")]
 pub struct Link {
     ptr: NonNull<libbpf_sys::bpf_link>,
 }
