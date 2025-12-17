@@ -11,7 +11,7 @@ on:
 
 jobs:
   build-linux-kernel:
-    uses: ./.github/workflows/build-linux.yml
+    uses: danielocfb/github-actions/.github/workflows/build-linux.yml@c434d741dc674cb0b1b804a573e0f0cd15b70847
     secrets: inherit
     with:
       rev: v6.18
