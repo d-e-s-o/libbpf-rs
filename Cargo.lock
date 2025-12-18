@@ -134,7 +134,7 @@ dependencies = [
  "clap",
  "iced-x86",
  "libbpf-rs",
- "nix 0.28.0",
+ "nix",
 ]
 
 [[package]]
@@ -208,12 +208,6 @@ name = "cfg-if"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
-
-[[package]]
-name = "cfg_aliases"
-version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fd16c4719339c4530435d38e511904438d07cce7950afa3718a84ac36c10e89e"
 
 [[package]]
 name = "cfg_aliases"
@@ -312,7 +306,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "73736a89c4aff73035ba2ed2e565061954da00d4970fc9ac25dcc85a2a20d790"
 dependencies = [
  "dispatch2",
- "nix 0.30.1",
+ "nix",
  "windows-sys 0.61.0",
 ]
 
@@ -547,7 +541,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ba0346fc595fa2c8e274903e8a0e3ed5e6a29183af167567f6289fd3b116881b"
 dependencies = [
  "cc",
- "nix 0.30.1",
+ "nix",
  "pkg-config",
 ]
 
@@ -643,27 +637,15 @@ dependencies = [
 
 [[package]]
 name = "nix"
-version = "0.28.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ab2156c4fce2f8df6c499cc1c763e4394b7482525bf2a9701c9d79d215f519e4"
-dependencies = [
- "bitflags 2.10.0",
- "cfg-if",
- "cfg_aliases 0.1.1",
- "libc",
- "memoffset",
-]
-
-[[package]]
-name = "nix"
 version = "0.30.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "74523f3a35e05aba87a1d978330aef40f67b0304ac79c1c00b294c9830543db6"
 dependencies = [
  "bitflags 2.10.0",
  "cfg-if",
- "cfg_aliases 0.2.1",
+ "cfg_aliases",
  "libc",
+ "memoffset",
 ]
 
 [[package]]
@@ -1118,7 +1100,7 @@ dependencies = [
  "libbpf-cargo",
  "libbpf-rs",
  "libc",
- "nix 0.28.0",
+ "nix",
  "vmlinux",
 ]
 
@@ -1263,7 +1245,7 @@ dependencies = [
  "ctrlc",
  "libbpf-cargo",
  "libbpf-rs",
- "nix 0.28.0",
+ "nix",
  "vmlinux",
 ]
 
