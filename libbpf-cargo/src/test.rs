@@ -814,6 +814,56 @@ fn test_skeleton_builder_basic() {
 }
 
 #[test]
+fn test_skeleton_builder_custom_opts() {
+    let bpf_c = indoc! {r#"
+        #include "vmlinux.h"
+        #include <bpf/bpf_helpers.h>
+
+        struct {
+            __uint(type, BPF_MAP_TYPE_HASH);
+            __type(key, u32);
+            __type(value, u32);
+            __uint(max_entries, 1);
+            __uint(pinning, LIBBPF_PIN_BY_NAME);
+        } auto_pin_map SEC(".maps");
+    "#}
+    .to_string();
+
+    let rust = indoc! {r#"
+        #![warn(elided_lifetimes_in_paths)]
+        mod bpf;
+        use std::mem::MaybeUninit;
+        use bpf::*;
+        use libbpf_rs::skel::OpenSkel as _;
+        use libbpf_rs::skel::SkelBuilder;
+
+        fn main() {
+            let mut builder = ProgSkelBuilder::default();
+            builder
+                .obj_builder
+                .pin_root_path("/sys/fs/bpf/test_skel_builder_opts_namespace")
+                .expect("root_pin_path failed");
+            let mut open_object = MaybeUninit::uninit();
+            let skel = builder
+                .open(&mut open_object)
+                .expect("failed to open skel")
+                .load()
+                .expect("failed to load object");
+            let expected_path = "/sys/fs/bpf/test_skel_builder_opts_namespace/auto_pin_map";
+            let auto_pin_map = &skel
+                .maps
+                .auto_pin_map;
+            assert!(auto_pin_map.is_pinned());
+
+            let pin_path = auto_pin_map.get_pin_path().expect("get map pin path failed");
+            assert_eq!(expected_path, pin_path.to_str().unwrap());
+        }
+    "#}
+    .to_string();
+    run_rust_project_from_bpf_c(&bpf_c, &rust);
+}
+
+#[test]
 fn test_skeleton_builder_clang_opts() {
     let (_dir, proj_dir, _cargo_toml) = setup_temp_project();
 
