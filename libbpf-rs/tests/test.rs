@@ -2881,11 +2881,11 @@ fn test_prog_info_verified_insns() {
         .progs()
         .next()
         .expect("should have at least one program");
-    let prog_name = CString::new(prog.name().as_encoded_bytes()).unwrap();
+    let prog_id = Program::id_from_fd(prog.as_fd()).expect("failed to get program ID");
 
     let info = ProgInfoIter::default()
-        .find(|p| p.name == prog_name)
-        .unwrap_or_else(|| panic!("failed to find program `{prog_name:?}` via ProgInfoIter"));
+        .find(|p| p.id == prog_id)
+        .unwrap_or_else(|| panic!("failed to find program with ID {prog_id} via ProgInfoIter"));
 
     assert!(
         info.verified_insns > 0,
