@@ -6,7 +6,7 @@ use core::time::Duration;
 use std::ffi::c_int;
 use std::mem::MaybeUninit;
 
-use plain::Plain;
+use libbpf_rs::Pod;
 
 use libbpf_rs::skel::OpenSkel;
 use libbpf_rs::skel::Skel;
@@ -23,10 +23,10 @@ mod ringbuf_multi {
 #[allow(clippy::wildcard_imports)]
 use ringbuf_multi::*;
 
-unsafe impl Plain for types::rb_sample {}
+unsafe impl Pod for types::rb_sample {}
 
 fn process_sample(ring: c_int, data: &[u8]) -> i32 {
-    let s = plain::from_bytes::<types::rb_sample>(data).unwrap();
+    let s = types::rb_sample::from_bytes(data).unwrap();
 
     match s.seq {
         0 => {

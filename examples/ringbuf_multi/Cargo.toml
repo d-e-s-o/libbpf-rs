@@ -12,7 +12,6 @@ vmlinux = { git = "https://github.com/libbpf/vmlinux.h.git", rev = "991dd4b8dfd8
 [dependencies]
 libbpf-rs = { path = "../../libbpf-rs" }
 libc = "0.2"
-plain = "0.2"
 
 [lints]
 workspace = true

@@ -13,7 +13,6 @@ vmlinux = { git = "https://github.com/libbpf/vmlinux.h.git", rev = "991dd4b8dfd8
 anyhow = "1.0"
 libbpf-rs = { path = "../../libbpf-rs" }
 libc = "0.2"
-plain = "0.2"
 time = { version = "0.3", features = ["formatting", "local-offset", "macros"]}
 clap = { version = "4.0.32", default-features = false, features = ["std", "derive", "help", "usage"] }
 

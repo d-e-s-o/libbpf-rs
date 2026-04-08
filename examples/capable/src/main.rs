@@ -17,8 +17,8 @@ use libbpf_rs::skel::OpenSkel;
 use libbpf_rs::skel::Skel;
 use libbpf_rs::skel::SkelBuilder;
 use libbpf_rs::PerfBufferBuilder;
+use libbpf_rs::Pod;
 use phf::phf_map;
-use plain::Plain;
 use time::macros::format_description;
 use time::OffsetDateTime;
 
@@ -110,7 +110,7 @@ struct Command {
     debug: bool,
 }
 
-unsafe impl Plain for capable::types::event {}
+unsafe impl Pod for capable::types::event {}
 
 fn print_banner(extra_fields: bool) {
     #[expect(clippy::print_literal)]
@@ -193,8 +193,8 @@ fn main() -> Result<()> {
 
     print_banner(opts.extra_fields);
     let handle_event = move |_cpu: i32, data: &[u8]| {
-        let mut event = capable::types::event::default();
-        plain::copy_from_bytes(&mut event, data).expect("Data buffer was too short");
+        let event =
+            capable::types::event::copy_from_bytes(data).expect("Data buffer was too short");
         _handle_event(opts, event);
     };
     let perf = PerfBufferBuilder::new(&skel.maps.events)

@@ -14,7 +14,6 @@ anyhow = "1.0"
 blazesym = "0.2"
 clap = { version = "4.0.32", default-features = false, features = ["std", "derive", "help", "usage"] }
 libbpf-rs = { path = "../../libbpf-rs" }
-plain = "0.2"
 
 [lints]
 workspace = true

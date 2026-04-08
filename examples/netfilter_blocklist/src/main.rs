@@ -18,6 +18,7 @@ use libbpf_rs::ErrorExt;
 use libbpf_rs::MapCore;
 use libbpf_rs::MapFlags;
 use libbpf_rs::NetfilterOpts;
+use libbpf_rs::Pod;
 use libbpf_rs::NFPROTO_IPV4;
 use libbpf_rs::NF_INET_LOCAL_OUT;
 
@@ -30,6 +31,10 @@ mod netfilter {
 
 #[allow(clippy::wildcard_imports)]
 use netfilter::*;
+
+// SAFETY: `lpm_key` is `#[repr(C)]`, `Copy`, has no padding, and is valid for
+// any bit pattern.
+unsafe impl Pod for types::lpm_key {}
 
 /// Netfilter Blocklist Example
 ///
@@ -79,7 +84,7 @@ fn main() -> Result<()> {
         addr: block_ip.to_be(),
     };
 
-    let block_ip_key = unsafe { plain::as_bytes(&block_ip_key) };
+    let block_ip_key = block_ip_key.as_bytes();
     let value = opts.value;
 
     skel.maps

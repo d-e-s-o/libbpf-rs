@@ -14,7 +14,7 @@ use libbpf_rs::skel::SkelBuilder;
 use libbpf_rs::MapCore;
 use libbpf_rs::MapFlags;
 use libbpf_rs::PerfBufferBuilder;
-use plain::Plain;
+use libbpf_rs::Pod;
 
 use blazesym::symbolize::source::Kernel;
 use blazesym::symbolize::source::Source;
@@ -50,7 +50,7 @@ struct Command {
     percpu_only: bool,
 }
 
-unsafe impl Plain for task_longrun::types::event {}
+unsafe impl Pod for task_longrun::types::event {}
 
 fn main() -> Result<()> {
     let opts = Command::parse();
@@ -81,8 +81,8 @@ fn main() -> Result<()> {
     let symbolizer = Symbolizer::new();
 
     let handle_event = move |_cpu: i32, data: &[u8]| {
-        let mut event = task_longrun::types::event::default();
-        plain::copy_from_bytes(&mut event, data).expect("Data buffer was too short");
+        let event =
+            task_longrun::types::event::copy_from_bytes(data).expect("Data buffer was too short");
 
         let task = str::from_utf8(&event.comm).unwrap();
         let duration_ms = event.duration as f64 / 1_000_000.0;

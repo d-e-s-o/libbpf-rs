@@ -78,7 +78,7 @@ where
     let mut value = 0i32;
     {
         let callback = |data: &[u8]| {
-            plain::copy_from_bytes(&mut value, data).expect("Wrong size");
+            value = libbpf_rs::Pod::copy_from_bytes(data).expect("Wrong size");
             0
         };
 

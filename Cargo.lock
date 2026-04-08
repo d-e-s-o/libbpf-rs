@@ -171,7 +171,6 @@ dependencies = [
  "libbpf-rs",
  "libc",
  "phf",
- "plain",
  "time",
  "vmlinux",
 ]
@@ -555,7 +554,6 @@ dependencies = [
  "log",
  "memmem",
  "pkg-config",
- "plain",
  "probe",
  "scopeguard",
  "serial_test",
@@ -673,7 +671,6 @@ dependencies = [
  "ctrlc",
  "libbpf-cargo",
  "libbpf-rs",
- "plain",
  "vmlinux",
 ]
 
@@ -917,7 +914,6 @@ dependencies = [
  "libbpf-cargo",
  "libbpf-rs",
  "libc",
- "plain",
  "vmlinux",
 ]
 
@@ -930,7 +926,6 @@ dependencies = [
  "libbpf-cargo",
  "libbpf-rs",
  "libc",
- "plain",
  "time",
  "vmlinux",
 ]
@@ -1136,7 +1131,6 @@ dependencies = [
  "clap",
  "libbpf-cargo",
  "libbpf-rs",
- "plain",
  "vmlinux",
 ]
 

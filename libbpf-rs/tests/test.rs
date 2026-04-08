@@ -60,6 +60,7 @@ use libbpf_rs::MapType;
 use libbpf_rs::Object;
 use libbpf_rs::ObjectBuilder;
 use libbpf_rs::PerfEventOpts;
+use libbpf_rs::Pod;
 use libbpf_rs::Program;
 use libbpf_rs::ProgramHandle;
 use libbpf_rs::ProgramInput;
@@ -71,7 +72,6 @@ use libbpf_rs::UprobeMultiOpts;
 use libbpf_rs::UprobeOpts;
 use libbpf_rs::UsdtOpts;
 use libbpf_rs::UserRingBuffer;
-use plain::Plain;
 use probe::probe;
 use scopeguard::defer;
 use tempfile::NamedTempFile;
@@ -1185,16 +1185,14 @@ fn test_object_ringbuf_raw() {
     static V2: AtomicI32 = AtomicI32::new(0);
 
     fn callback1(data: &[u8]) -> i32 {
-        let mut value: i32 = 0;
-        plain::copy_from_bytes(&mut value, data).expect("Wrong size");
+        let value: i32 = i32::copy_from_bytes(data).expect("Wrong size");
 
         V1.store(value, Ordering::SeqCst);
         0
     }
 
     fn callback2(data: &[u8]) -> i32 {
-        let mut value: i32 = 0;
-        plain::copy_from_bytes(&mut value, data).expect("Wrong size");
+        let value: i32 = i32::copy_from_bytes(data).expect("Wrong size");
 
         V2.store(value, Ordering::SeqCst);
         0
@@ -1335,16 +1333,14 @@ fn test_object_ringbuf() {
     static V2: AtomicI32 = AtomicI32::new(0);
 
     fn callback1(data: &[u8]) -> i32 {
-        let mut value: i32 = 0;
-        plain::copy_from_bytes(&mut value, data).expect("Wrong size");
+        let value: i32 = i32::copy_from_bytes(data).expect("Wrong size");
 
         V1.store(value, Ordering::SeqCst);
         0
     }
 
     fn callback2(data: &[u8]) -> i32 {
-        let mut value: i32 = 0;
-        plain::copy_from_bytes(&mut value, data).expect("Wrong size");
+        let value: i32 = i32::copy_from_bytes(data).expect("Wrong size");
 
         V2.store(value, Ordering::SeqCst);
         0
@@ -1410,8 +1406,7 @@ fn test_object_ringbuf_closure() {
 
     let (sender1, receiver1) = channel();
     let callback1 = move |data: &[u8]| -> i32 {
-        let mut value: i32 = 0;
-        plain::copy_from_bytes(&mut value, data).expect("Wrong size");
+        let value: i32 = i32::copy_from_bytes(data).expect("Wrong size");
 
         sender1.send(value).expect("failed to send value");
 
@@ -1420,8 +1415,7 @@ fn test_object_ringbuf_closure() {
 
     let (sender2, receiver2) = channel();
     let callback2 = move |data: &[u8]| -> i32 {
-        let mut value: i32 = 0;
-        plain::copy_from_bytes(&mut value, data).expect("Wrong size");
+        let value: i32 = i32::copy_from_bytes(data).expect("Wrong size");
 
         sender2.send(value).expect("failed to send value");
 
@@ -1485,7 +1479,7 @@ fn test_object_ringbuf_with_closed_map() {
             let map = get_map_mut(&mut obj, "ringbuf");
 
             let callback = |data: &[u8]| {
-                plain::copy_from_bytes(&mut value, data).expect("Wrong size");
+                value = i32::copy_from_bytes(data).expect("Wrong size");
                 0
             };
 
@@ -1517,12 +1511,13 @@ fn test_object_ringbuf_with_closed_map() {
 #[test]
 fn test_object_user_ringbuf() {
     #[repr(C)]
+    #[derive(Copy, Clone)]
     struct MyStruct {
         key: u32,
         value: u32,
     }
 
-    unsafe impl Plain for MyStruct {}
+    unsafe impl Pod for MyStruct {}
 
     let mut obj = get_test_object("user_ringbuf.bpf.o");
     let prog = get_prog_mut(&mut obj, "handle__sys_enter_getpid");
@@ -1533,7 +1528,7 @@ fn test_object_user_ringbuf() {
         .reserve(size_of::<MyStruct>())
         .expect("failed to reserve space");
     let bytes = urb_sample.as_mut();
-    let my_struct = plain::from_mut_bytes::<MyStruct>(bytes).expect("failed to convert bytes");
+    let my_struct = MyStruct::from_bytes_mut(bytes).expect("failed to convert bytes");
     my_struct.key = 42;
     my_struct.value = 1337;
     user_ringbuf
@@ -1604,7 +1599,7 @@ fn test_object_task_iter() {
         pid: i32,
     }
 
-    unsafe impl Plain for IndexPidPair {}
+    unsafe impl Pod for IndexPidPair {}
 
     fn test_iter(link: libbpf_rs::Link) {
         let mut iter = Iter::new(&link).expect("failed to create iterator");
@@ -1616,8 +1611,8 @@ fn test_object_task_iter() {
         assert!(bytes_read > 0);
         assert_eq!(bytes_read % size_of::<IndexPidPair>(), 0);
 
-        let items: &[IndexPidPair] =
-            plain::slice_from_bytes(buf.as_slice()).expect("Input slice cannot satisfy length");
+        let items: &[IndexPidPair] = IndexPidPair::slice_from_bytes(buf.as_slice())
+            .expect("Input slice cannot satisfy length");
         assert!(!items.is_empty());
         assert_eq!(items[0].i, 0);
         assert!(items.windows(2).all(|w| w[0].i + 1 == w[1].i));
@@ -1701,8 +1696,7 @@ fn test_object_map_iter() {
     assert!(bytes_read > 0);
     assert_eq!(bytes_read % size_of::<u32>(), 0);
     // Convert buf to &[u32]
-    let buf =
-        plain::slice_from_bytes::<u32>(buf.as_slice()).expect("Input slice cannot satisfy length");
+    let buf = u32::slice_from_bytes(buf.as_slice()).expect("Input slice cannot satisfy length");
     assert!(buf.contains(&0));
     assert!(buf.contains(&1));
     assert!(buf.contains(&2));

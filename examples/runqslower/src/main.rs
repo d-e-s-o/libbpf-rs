@@ -11,8 +11,8 @@ use clap::Parser;
 use libbpf_rs::skel::OpenSkel;
 use libbpf_rs::skel::Skel;
 use libbpf_rs::skel::SkelBuilder;
+use libbpf_rs::Pod;
 use libbpf_rs::RingBufferBuilder;
-use plain::Plain;
 use time::macros::format_description;
 use time::OffsetDateTime;
 
@@ -43,11 +43,10 @@ struct Command {
     verbose: bool,
 }
 
-unsafe impl Plain for runqslower::types::event {}
+unsafe impl Pod for runqslower::types::event {}
 
 fn handle_event(data: &[u8]) -> i32 {
-    let event =
-        plain::from_bytes::<types::event>(data).expect("Data buffer was too short or unaligned");
+    let event = types::event::from_bytes(data).expect("Data buffer was too short or unaligned");
 
     let now = if let Ok(now) = OffsetDateTime::now_local() {
         let format = format_description!("[hour]:[minute]:[second]");

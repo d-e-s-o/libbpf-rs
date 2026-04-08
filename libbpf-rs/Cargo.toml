@@ -54,7 +54,6 @@ libbpf-rs = {path = ".", features = ["generate-test-files"]}
 libbpf-rs-dev = {path = "dev", features = ["generate-test-files"]}
 log = "0.4.4"
 memmem = "0.1.1"
-plain = "0.2.3"
 probe = "0.3"
 scopeguard = "1.1"
 serial_test = { version = "3.0", default-features = false }
