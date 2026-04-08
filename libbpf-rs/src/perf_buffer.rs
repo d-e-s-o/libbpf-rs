@@ -68,8 +68,8 @@ where
 {
     /// Callback to run when a sample is received.
     ///
-    /// This callback provides a raw byte slice. You may find libraries such as
-    /// [`plain`](https://crates.io/crates/plain) helpful.
+    /// This callback provides a raw byte slice. You may find the [`Pod`][crate::Pod]
+    /// trait helpful for converting between byte slices and typed values.
     ///
     /// Callback arguments are: `(cpu, data)`.
     pub fn sample_cb<F>(self, cb: F) -> Self

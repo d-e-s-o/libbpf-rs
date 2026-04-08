@@ -70,8 +70,8 @@ impl<'slf, 'cb: 'slf> RingBufferBuilder<'slf, 'cb> {
     /// Negative return values in the callback will stop ring buffer consumption early and
     /// propagate the error code to the polling caller.
     ///
-    /// The callback provides a raw byte slice. You may find libraries such as
-    /// [`plain`](https://crates.io/crates/plain) helpful.
+    /// The callback provides a raw byte slice. You may find the [`Pod`][crate::Pod]
+    /// trait helpful for converting between byte slices and typed values.
     #[doc(alias = "ring_buffer__add")]
     pub fn add<NewF>(&mut self, map: &'slf dyn MapCore, callback: NewF) -> Result<&mut Self>
     where

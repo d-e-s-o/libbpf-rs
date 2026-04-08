@@ -20,9 +20,8 @@ use crate::Result;
 /// A mutable reference to sample from a [`UserRingBuffer`].
 ///
 /// To write to the sample, dereference with `as_mut()` to get a mutable
-/// reference to the raw byte slice. You may find libraries such as
-/// [`plain`](https://crates.io/crates/plain) helpful to convert between raw
-/// bytes and structs.
+/// reference to the raw byte slice. You may find the [`Pod`][crate::Pod] trait
+/// helpful for converting between raw bytes and typed values.
 #[derive(Debug)]
 pub struct UserRingBufferSample<'slf> {
     // A pointer to an 8-byte aligned reserved region of the user ring buffer

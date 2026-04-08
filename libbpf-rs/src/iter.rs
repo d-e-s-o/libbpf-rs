@@ -12,8 +12,8 @@ use crate::Result;
 /// Linux 5.8.
 ///
 /// This implements [`std::io::Read`] for reading bytes from the iterator.
-/// Methods require working with raw bytes. You may find libraries such as
-/// [`plain`](https://crates.io/crates/plain) helpful.
+/// Methods require working with raw bytes. You may find the [`Pod`][crate::Pod]
+/// trait helpful for converting between byte slices and typed values.
 #[derive(Debug)]
 #[doc(alias = "bpf_iter_create")]
 pub struct Iter {

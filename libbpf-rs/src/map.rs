@@ -51,8 +51,8 @@ pub type OpenMapMut<'obj> = OpenMapImpl<'obj, Mut>;
 ///
 /// This object exposes operations that need to happen before the map is created.
 ///
-/// Some methods require working with raw bytes. You may find libraries such as
-/// [`plain`](https://crates.io/crates/plain) helpful.
+/// Some methods require working with raw bytes. You may find the [`Pod`][crate::Pod]
+/// trait helpful for converting between byte slices and typed values.
 #[derive(Debug)]
 #[repr(transparent)]
 #[doc(alias = "bpf_map")]
@@ -958,8 +958,8 @@ pub type MapMut<'obj> = MapImpl<'obj, Mut>;
 
 /// Represents a libbpf-created map.
 ///
-/// Some methods require working with raw bytes. You may find libraries such as
-/// [`plain`](https://crates.io/crates/plain) helpful.
+/// Some methods require working with raw bytes. You may find the [`Pod`][crate::Pod]
+/// trait helpful for converting between byte slices and typed values.
 #[derive(Debug)]
 #[doc(alias = "bpf_map")]
 pub struct MapImpl<'obj, T = ()> {
@@ -1162,8 +1162,8 @@ impl AsRawLibbpf for Map<'_> {
 /// let map_handle = MapHandle::try_from(map).unwrap();
 /// ```
 ///
-/// Some methods require working with raw bytes. You may find libraries such as
-/// [`plain`](https://crates.io/crates/plain) helpful.
+/// Some methods require working with raw bytes. You may find the [`Pod`][crate::Pod]
+/// trait helpful for converting between byte slices and typed values.
 #[derive(Debug)]
 pub struct MapHandle {
     fd: OwnedFd,
