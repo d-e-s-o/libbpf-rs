@@ -23,8 +23,6 @@ mod ringbuf_multi {
 #[allow(clippy::wildcard_imports)]
 use ringbuf_multi::*;
 
-unsafe impl Pod for types::rb_sample {}
-
 fn process_sample(ring: c_int, data: &[u8]) -> i32 {
     let s = types::rb_sample::from_bytes(data).unwrap();
 

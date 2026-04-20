@@ -43,8 +43,6 @@ struct Command {
     verbose: bool,
 }
 
-unsafe impl Pod for runqslower::types::event {}
-
 fn handle_event(data: &[u8]) -> i32 {
     let event = types::event::from_bytes(data).expect("Data buffer was too short or unaligned");
 

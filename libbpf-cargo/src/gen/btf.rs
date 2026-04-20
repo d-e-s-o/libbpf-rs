@@ -641,6 +641,7 @@ impl StructOps {{
 pub(crate) struct GenBtf<'s> {
     btf: Btf<'s>,
     type_map: TypeMap,
+    pod_cache: RefCell<HashMap<TypeId, bool>>,
 }
 
 impl Debug for GenBtf<'_> {
@@ -656,6 +657,7 @@ impl<'s> From<Btf<'s>> for GenBtf<'s> {
         Self {
             btf,
             type_map: Default::default(),
+            pod_cache: Default::default(),
         }
     }
 }
@@ -687,6 +689,51 @@ impl<'s> GenBtf<'s> {
     /// Type qualifiers are discarded (eg `const`, `volatile`, etc).
     fn type_default(&self, ty: BtfType<'s>) -> Result<String> {
         type_default(ty, &self.type_map)
+    }
+
+    /// Check whether the given BTF type is eligible for a `Pod` impl.
+    ///
+    /// A type is Pod-eligible if it (and all its fields, recursively)
+    /// can be safely reinterpreted as raw bytes: no `bool`, no
+    /// pointers, no floats, no `c_void`.
+    fn is_pod_eligible(&self, ty: BtfType<'_>) -> bool {
+        let ty = ty.skip_mods_and_typedefs();
+        let type_id = ty.type_id();
+
+        if let Some(&cached) = self.pod_cache.borrow().get(&type_id) {
+            return cached;
+        }
+
+        // Insert a `false` sentinel to break any hypothetical cycle.
+        self.pod_cache.borrow_mut().insert(type_id, false);
+
+        let result = btf_type_match!(match ty {
+            BtfKind::Int(t) => !matches!(t.encoding, types::IntEncoding::Bool),
+            BtfKind::Enum(_t) => true,
+            BtfKind::Enum64(_t) => true,
+            BtfKind::Array(t) => self.is_pod_eligible(t.contained_type()),
+            BtfKind::Composite(t) => {
+                let eligible = t.iter().all(|member| {
+                    // Bitfield members are skipped in codegen and covered
+                    // by explicit padding bytes, which are always Pod.
+                    if matches!(member.attr, MemberAttr::BitField { .. }) {
+                        return true;
+                    }
+                    match self.type_by_id::<BtfType<'_>>(member.ty) {
+                        Some(field_ty) => self.is_pod_eligible(field_ty),
+                        None => false,
+                    }
+                });
+                eligible
+            }
+            BtfKind::Var(t) => self.is_pod_eligible(t.referenced_type()),
+            // Float, Ptr, Void, Fwd, Func, FuncProto, and anything
+            // else are not Pod-eligible.
+            _ => false,
+        });
+
+        self.pod_cache.borrow_mut().insert(type_id, result);
+        result
     }
 
     /// Returns rust type definition of `ty` in string format, including dependent types.
@@ -981,6 +1028,14 @@ impl<'s> GenBtf<'s> {
             writeln!(def, r#"    }}"#)?;
             writeln!(def, r#"}}"#)?;
         }
+
+        if self.is_pod_eligible(*t) {
+            writeln!(
+                def,
+                r#"unsafe impl Pod for {} {{}}"#,
+                self.type_map.type_name_or_anon(&t),
+            )?;
+        }
         Ok(())
     }
 
@@ -1026,6 +1081,8 @@ impl<'s> GenBtf<'s> {
             )?;
             writeln!(def, r#"}}"#)?;
         }
+
+        writeln!(def, r#"unsafe impl Pod for {enum_name} {{}}"#)?;
 
         Ok(())
     }
@@ -1095,6 +1152,22 @@ impl<'s> GenBtf<'s> {
         }
 
         writeln!(def, "}}")?;
+
+        let datasec_pod = t.iter().all(|datasec_var| {
+            let var = match self.type_by_id::<types::Var<'_>>(datasec_var.ty) {
+                Some(v) => v,
+                None => return false,
+            };
+            if var.linkage() == Linkage::Static {
+                // Static vars are not emitted, so they don't affect eligibility.
+                return true;
+            }
+            self.is_pod_eligible(*var)
+        });
+        if datasec_pod {
+            writeln!(def, r#"unsafe impl Pod for {sec_name} {{}}"#)?;
+        }
+
         Ok(())
     }
 }

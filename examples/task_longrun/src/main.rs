@@ -50,8 +50,6 @@ struct Command {
     percpu_only: bool,
 }
 
-unsafe impl Pod for task_longrun::types::event {}
-
 fn main() -> Result<()> {
     let opts = Command::parse();
 

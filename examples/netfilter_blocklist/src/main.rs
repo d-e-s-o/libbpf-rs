@@ -32,10 +32,6 @@ mod netfilter {
 #[allow(clippy::wildcard_imports)]
 use netfilter::*;
 
-// SAFETY: `lpm_key` is `#[repr(C)]`, `Copy`, has no padding, and is valid for
-// any bit pattern.
-unsafe impl Pod for types::lpm_key {}
-
 /// Netfilter Blocklist Example
 ///
 /// Drop specified IP packets in netfilter hook

@@ -1649,6 +1649,7 @@ fn test_btf_dump_align() {
             pub x: i32,
             pub __pad_4: [u8; 12],
         }
+        unsafe impl Pod for Foo {}
     "#};
 
     let mmap = build_btf_mmap(prog_text);
@@ -1686,6 +1687,7 @@ fn test_btf_dump_insane_align() {
                 }
             }
         }
+        unsafe impl Pod for Foo {}
     "#};
 
     let mmap = build_btf_mmap(prog_text);
@@ -1729,6 +1731,7 @@ fn test_btf_dump_align_trailing_bitfield() {
             pub x: u8,
             pub __pad_1: [u8; 3],
         }
+        unsafe impl Pod for Foo {}
     "#};
 
     // Note that ideally the `repr` would be `packed` as well, but we
@@ -1741,6 +1744,7 @@ fn test_btf_dump_align_trailing_bitfield() {
             pub x: u8,
             pub __pad_1: [u8; 3],
         }
+        unsafe impl Pod for Bar {}
     "#};
 
     let expected_baz_output = indoc! {r#"
@@ -1750,6 +1754,7 @@ fn test_btf_dump_align_trailing_bitfield() {
             pub x: u8,
             pub __pad_1: [u8; 3],
         }
+        unsafe impl Pod for Baz {}
     "#};
 
     let mmap = build_btf_mmap(prog_text);
@@ -1880,6 +1885,7 @@ fn test_btf_dump_struct_definition() {
         pub struct Bar {
             pub x: u16,
         }
+        unsafe impl Pod for Bar {}
     "#};
 
     let mmap = build_btf_mmap(prog_text);
@@ -1998,6 +2004,7 @@ fn test_btf_dump_struct_definition_long_array() {
                 }
             }
         }
+        unsafe impl Pod for Bar {}
     "#};
 
     let mmap = build_btf_mmap(prog_text);
@@ -2032,6 +2039,7 @@ fn test_btf_dump_definition_packed_struct() {
             pub y: i8,
             pub z: [i32; 2],
         }
+        unsafe impl Pod for Foo {}
     "#};
 
     let mmap = build_btf_mmap(prog_text);
@@ -2075,6 +2083,7 @@ fn test_btf_dump_definition_packed_struct_long_array() {
                 }
             }
         }
+        unsafe impl Pod for Foo {}
     "#};
 
     let mmap = build_btf_mmap(prog_text);
@@ -2106,6 +2115,7 @@ fn test_btf_dump_definition_bitfield_1() {
         pub struct Foo {
             pub __pad_0: [u8; 2],
         }
+        unsafe impl Pod for Foo {}
     "#};
 
     let mmap = build_btf_mmap(prog_text);
@@ -2191,6 +2201,7 @@ fn test_btf_dump_definition_enum() {
         pub struct Bar {
             pub foo: Foo,
         }
+        unsafe impl Pod for Bar {}
         #[derive(Debug, Copy, Clone, Eq, PartialEq)]
         #[repr(transparent)]
         pub struct Foo(pub u32);
@@ -2205,6 +2216,7 @@ fn test_btf_dump_definition_enum() {
         impl Default for Foo {
             fn default() -> Self { Self::Zero }
         }
+        unsafe impl Pod for Foo {}
     "#};
 
     let mmap = build_btf_mmap(prog_text);
@@ -2238,6 +2250,7 @@ fn test_btf_dump_definition_enum_signed() {
         pub struct Bar {
             pub foo: Foo,
         }
+        unsafe impl Pod for Bar {}
         #[derive(Debug, Copy, Clone, Eq, PartialEq)]
         #[repr(transparent)]
         pub struct Foo(pub i32);
@@ -2249,6 +2262,7 @@ fn test_btf_dump_definition_enum_signed() {
         impl Default for Foo {
             fn default() -> Self { Self::Zero }
         }
+        unsafe impl Pod for Foo {}
     "#};
 
     let mmap = build_btf_mmap(prog_text);
@@ -2282,6 +2296,7 @@ fn test_btf_dump_definition_enum64() {
         pub struct Bar {
             pub foo: Foo,
         }
+        unsafe impl Pod for Bar {}
         #[derive(Debug, Copy, Clone, Eq, PartialEq)]
         #[repr(transparent)]
         pub struct Foo(pub u64);
@@ -2293,6 +2308,7 @@ fn test_btf_dump_definition_enum64() {
         impl Default for Foo {
             fn default() -> Self { Self::Zero }
         }
+        unsafe impl Pod for Foo {}
     "#};
 
     let mmap = build_btf_mmap(prog_text);
@@ -2326,6 +2342,7 @@ fn test_btf_dump_definition_enum64_signed() {
         pub struct Bar {
             pub foo: Foo,
         }
+        unsafe impl Pod for Bar {}
         #[derive(Debug, Copy, Clone, Eq, PartialEq)]
         #[repr(transparent)]
         pub struct Foo(pub i64);
@@ -2337,6 +2354,7 @@ fn test_btf_dump_definition_enum64_signed() {
         impl Default for Foo {
             fn default() -> Self { Self::Zero }
         }
+        unsafe impl Pod for Foo {}
     "#};
 
     let mmap = build_btf_mmap(prog_text);
@@ -2382,6 +2400,7 @@ fn test_btf_dump_definition_union() {
                 }
             }
         }
+        unsafe impl Pod for Foo {}
     "#};
 
     let mmap = build_btf_mmap(prog_text);
@@ -2418,11 +2437,13 @@ fn test_btf_dump_definition_shared_dependent_types() {
             pub bar: Bar,
             pub bartwo: Bar,
         }
+        unsafe impl Pod for Foo {}
         #[derive(Debug, Default, Copy, Clone)]
         #[repr(C)]
         pub struct Bar {
             pub x: u16,
         }
+        unsafe impl Pod for Bar {}
     "#};
 
     let mmap = build_btf_mmap(prog_text);
@@ -2481,6 +2502,7 @@ fn test_btf_dump_definition_datasec() {
         pub struct rodata {
             pub myconstglobal: i32,
         }
+        unsafe impl Pod for rodata {}
     "#};
 
     let mmap = build_btf_mmap(prog_text);
@@ -2511,6 +2533,7 @@ fn test_btf_dump_definition_datasec_custom() {
         pub struct bss_custom {
             pub bss_array: [i32; 1],
         }
+        unsafe impl Pod for bss_custom {}
     "#};
 
     let data_custom_output = indoc! {r#"
@@ -2519,6 +2542,7 @@ fn test_btf_dump_definition_datasec_custom() {
         pub struct data_custom {
             pub data_array: [i32; 1],
         }
+        unsafe impl Pod for data_custom {}
     "#};
 
     let rodata_custom_output = indoc! {r#"
@@ -2527,6 +2551,7 @@ fn test_btf_dump_definition_datasec_custom() {
         pub struct rodata_custom_1 {
             pub rodata_array: [i32; 1],
         }
+        unsafe impl Pod for rodata_custom_1 {}
     "#};
 
     let mmap = build_btf_mmap(prog_text);
@@ -2587,6 +2612,7 @@ fn test_btf_dump_definition_datasec_long_array() {
         pub struct rodata {
             pub myconstglobal: i32,
         }
+        unsafe impl Pod for rodata {}
     "#};
 
     let mmap = build_btf_mmap(prog_text);
@@ -2655,6 +2681,7 @@ fn test_btf_dump_definition_datasec_multiple() {
             pub ci2: i32,
             pub ci3: i32,
         }
+        unsafe impl Pod for rodata {}
     "#};
 
     let mmap = build_btf_mmap(prog_text);
@@ -2723,6 +2750,7 @@ impl Default for Foo {
             pub ci2: i32,
             pub ci3: i32,
         }
+        unsafe impl Pod for rodata {}
     "#};
 
     let mmap = build_btf_mmap(prog_text);
@@ -2787,6 +2815,7 @@ fn test_btf_dump_definition_struct_inner_anon_union() {
                 }
             }
         }
+        unsafe impl Pod for __anon_Foo_1 {}
         #[derive(Copy, Clone)]
         #[repr(C)]
         pub union __anon_Foo_2 {
@@ -2854,6 +2883,7 @@ fn test_btf_dump_definition_struct_inner_anon_struct() {
             pub y: [u8; 10],
             pub z: [u16; 16],
         }
+        unsafe impl Pod for __anon_Foo_1 {}
         #[derive(Debug, Copy, Clone)]
         #[repr(C)]
         pub struct __anon_Foo_2 {
@@ -2929,6 +2959,7 @@ fn test_btf_dump_definition_struct_inner_anon_struct_and_union() {
             pub y: [u8; 10],
             pub z: [u16; 16],
         }
+        unsafe impl Pod for __anon_Foo_1 {}
         #[derive(Copy, Clone)]
         #[repr(C)]
         pub union __anon_Foo_2 {
@@ -2981,6 +3012,7 @@ fn test_btf_dump_definition_struct_inner_anon_struct_and_union() {
                 }
             }
         }
+        unsafe impl Pod for __anon_Foo_4 {}
     "#};
 
     let mmap = build_btf_mmap(prog_text);
@@ -3190,6 +3222,7 @@ fn test_btf_dump_definition_anon_enum() {
         pub struct Foo {
             pub test: __anon_Foo_1,
         }
+        unsafe impl Pod for Foo {}
         #[derive(Debug, Copy, Clone, Eq, PartialEq)]
         #[repr(transparent)]
         pub struct __anon_Foo_1(pub u32);
@@ -3200,6 +3233,7 @@ fn test_btf_dump_definition_anon_enum() {
         impl Default for __anon_Foo_1 {
             fn default() -> Self { Self::FOO }
         }
+        unsafe impl Pod for __anon_Foo_1 {}
     "#};
 
     let mmap = build_btf_mmap(prog_text);
@@ -3317,6 +3351,7 @@ fn test_btf_dump_definition_unnamed_union() {
                 }
             }
         }
+        unsafe impl Pod for __anon_bpf_sock_tuple_5_15_1 {}
         #[derive(Copy, Clone)]
         #[repr(C)]
         pub union __anon_bpf_sock_tuple_5_15_2 {
@@ -3343,6 +3378,7 @@ fn test_btf_dump_definition_unnamed_union() {
             pub sport: u16,
             pub dport: u16,
         }
+        unsafe impl Pod for __anon_bpf_sock_tuple_5_15_3 {}
         #[derive(Debug, Default, Copy, Clone)]
         #[repr(C)]
         pub struct __anon_bpf_sock_tuple_5_15_4 {
@@ -3351,6 +3387,7 @@ fn test_btf_dump_definition_unnamed_union() {
             pub sport: u16,
             pub dport: u16,
         }
+        unsafe impl Pod for __anon_bpf_sock_tuple_5_15_4 {}
     "#};
 
     let mmap = build_btf_mmap(prog_text);
@@ -3380,6 +3417,7 @@ fn test_btf_dump_definition_empty_union() {
         pub struct struct_with_empty_union {
             pub member: i32,
         }
+        unsafe impl Pod for struct_with_empty_union {}
     "#};
 
     let mmap = build_btf_mmap(prog_text);

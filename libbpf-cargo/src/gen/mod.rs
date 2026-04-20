@@ -863,6 +863,8 @@ fn gen_skel_contents(raw_obj_name: &str, obj_file_path: &Path, obj_ref: bool) ->
         use libbpf_rs::AsRawLibbpf as _;
         use libbpf_rs::MapCore as _;
         use libbpf_rs::ObjectBuilder;
+        #[allow(unused_imports)]
+        use libbpf_rs::Pod;
         "
     )?;
 
@@ -1026,7 +1028,7 @@ fn gen_skel_contents(raw_obj_name: &str, obj_file_path: &Path, obj_ref: bool) ->
             skel,
             "\
                 pub mod types {{
-                    #[allow(unused_imports)]
+                    #[allow(unused_imports, clippy::wildcard_imports)]
                     use super::*;
             "
         )?;
@@ -1045,7 +1047,7 @@ pub struct StructOps {{}}
             skel,
             "\
                 pub mod types {{
-                    #[allow(unused_imports)]
+                    #[allow(unused_imports, clippy::wildcard_imports)]
                     use super::*;
             "
         )?;

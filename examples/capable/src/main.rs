@@ -110,8 +110,6 @@ struct Command {
     debug: bool,
 }
 
-unsafe impl Pod for capable::types::event {}
-
 fn print_banner(extra_fields: bool) {
     #[expect(clippy::print_literal)]
     if extra_fields {
