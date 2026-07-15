@@ -56,7 +56,9 @@ jobs:
         vmlinux: 'true'
     - uses: dtolnay/rust-toolchain@master
       with:
-        toolchain: ${{ matrix.rust }}
+        # Pin nightly to work around a rustc ICE present in more recent
+        # versions. Revert to `${{ matrix.rust }}` once fixed upstream.
+        toolchain: ${{ matrix.rust == 'nightly' && 'nightly-2026-07-10' || matrix.rust }}
         components: rustfmt
     - name: Install deps
       run: |
