@@ -100,8 +100,11 @@ fn main() -> Result<()> {
             match stacks.lookup(&stkid.to_ne_bytes(), MapFlags::empty()) {
                 Ok(Some(stack)) => {
                     let valid_addrs = stack
-                        .chunks_exact(8)
-                        .map(|chunk| u64::from_ne_bytes(chunk.try_into().unwrap()))
+                        .as_chunks::<8>()
+                        .0
+                        .iter()
+                        .copied()
+                        .map(u64::from_ne_bytes)
                         .filter(|&addr| addr != 0)
                         .collect::<Vec<_>>();
                     match symbolizer.symbolize(&src, Input::AbsAddr(&valid_addrs)) {
