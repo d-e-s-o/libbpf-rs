@@ -1,56 +1,21 @@
 # libbpf-rs tests
 
-libbpf-rs tests are designed to be independent of libbpf-cargo and underlying
-compiler versions. To that end, we check in pre-compiled bpf object files in
-`libbpf-rs/tests/bin`. To help with writing new tests, the original source
-code for the pre-compiled objects are placed in `libbpf-rs/tests/bin/src`.
+libbpf-rs tests are designed to be independent of libbpf-cargo. To that end they
+work with `libbpf_rs::Object` directly and load pre-compiled BPF object files
+from `libbpf-rs/tests/bin`.
 
-To regenerate the test bpf object files 
-run bpf_object_regen.sh script via the command:
-$ ./bpf_object_regen.sh
+These object files are not checked in. Every `*.bpf.c` file in
+`libbpf-rs/tests/bin/src` is compiled into a corresponding `*.bpf.o` by the
+`libbpf-rs-dev` build script (`libbpf-rs/dev/build.rs`), which runs as part of
+building the tests and requires nothing but `clang` in `PATH`. Adding a test
+program is a matter of dropping a new `*.bpf.c` into that directory.
 
-The script bpf_object_regen.sh depends on the following packages installed:
+The one exception to the above is functionality that is only reachable through a
+generated skeleton, such as BPF arena global variables. For those, the same
+build script additionally invokes `libbpf_cargo::SkeletonBuilder` to emit a
+`*.skel.rs` next to the object file; see the `SKELETONS` list in
+`libbpf-rs/dev/build.rs`. Please keep this list short and prefer working with
+`Object` where that is possible at all.
 
-bash
-bpftool (optional)
-clang
-libbpf
-
-Installation Instructions for common distributions
-
-Ubuntu 21.10+: (should work with 20.10+ (untested), 20.04 will not work!!)
-required:
-$ apt install bash clang libbpf-dev
-optional:
-$ apt install linux-tools-generic
-Note: bin/src/runqslower.bpf.c requires a vmlinux.h generated from kernel 5.14+
-
-Debian 11+:
-required:
-$ apt install bash clang libbpf-dev
-optional:
-$ apt install bpftool
-Note: bin/src/runqslower.bpf.c requires a vmlinux.h generated from kernel 5.14+
-Note: requires running with 
-$ PATH=$PATH:/usr/sbin/ ./bpf_object_regen.sh -b ...
-
-Arch Linux: (tested as of 2021/12/16)
-required:
-$ pacman -S bash clang libbpf
-optional:
-$ pacman -S bpf
-
-Fedora 35+, Centos Stream 9: (should work with Fedora 34 (untested), RHEL 9 (untested))
-required:
-$ dnf install bash clang libbpf-devel
-optional:
-$ dnf install bpftool
-
-Alma Linux 8.5+: (should work with Centos-Stream-8 (untested) and derivatives eg RHEL 8.5 (untested))
-required:
-$ dnf install epel-release
-$ dnf --enablerepo=powertools install bash clang libbpf-devel
-optional:
-$ dnf install bpftool
-Note: bin/src/runqslower.bpf.c requires a vmlinux.h generated from kernel 5.14+
-
+Note that `bin/src/arena.bpf.c` requires clang 19 or newer, which is the first
+release defining `__BPF_FEATURE_ADDR_SPACE_CAST`.
