@@ -1,3 +1,10 @@
+Unreleased
+----------
+- Added `<arena-map>_data` skeleton members for accessing `__arena` global
+  variables; note that, unlike `bpftool`, which always names them after the
+  `.addr_space.1` section, we name them after the arena map
+
+
 0.27.1
 ------
 - Removed requirement for `.o` extension for object files
