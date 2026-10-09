@@ -1930,6 +1930,19 @@ impl MapFdInfo {
             })
         }
 
+        fn parse_hex(key: &str, val: &str) -> Result<u64> {
+            if let Some(hex) = val.strip_prefix("0x").or_else(|| val.strip_prefix("0X")) {
+                u64::from_str_radix(hex, 16)
+            } else {
+                val.parse()
+            }
+            .map_err(|e| {
+                Error::with_invalid_data(format!(
+                    "failed to parse map fd info data for key `{key}`: {e}"
+                ))
+            })
+        }
+
         let path = format!("/proc/self/fdinfo/{}", fd.as_raw_fd());
         let file = File::open(&path).with_context(|| format!("failed to open `{path}`"))?;
         let reader = BufReader::new(file);
@@ -1960,13 +1973,8 @@ impl MapFdInfo {
                 "key_size" => key_size = Some(parse(key, value)?),
                 "value_size" => value_size = Some(parse(key, value)?),
                 "max_entries" => max_entries = Some(parse(key, value)?),
-                "map_flags" => {
-                    map_flags =
-                        Some(parse_hex(value).with_context(|| format!("bad `{key}`"))? as u32)
-                }
-                "map_extra" => {
-                    map_extra = Some(parse_hex(value).with_context(|| format!("bad `{key}`"))?)
-                }
+                "map_flags" => map_flags = Some(parse_hex(key, value)? as u32),
+                "map_extra" => map_extra = Some(parse_hex(key, value)?),
                 "memlock" => memlock = Some(parse(key, value)?),
                 "map_id" => map_id = Some(parse(key, value)?),
                 "frozen" => frozen = Some(parse::<u32>(key, value)? != 0),
@@ -1994,15 +2002,6 @@ impl MapFdInfo {
     }
 }
 
-/// Parse a value that may be in hex (0x...) or decimal format.
-fn parse_hex(s: &str) -> Result<u64> {
-    if let Some(hex) = s.strip_prefix("0x").or_else(|| s.strip_prefix("0X")) {
-        u64::from_str_radix(hex, 16)
-    } else {
-        s.parse()
-    }
-    .map_err(Error::with_invalid_data)
-}
 
 #[cfg(test)]
 mod tests {
