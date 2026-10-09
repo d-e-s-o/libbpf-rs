@@ -12,6 +12,7 @@ use std::io::BufReader;
 use std::marker::PhantomData;
 use std::mem;
 use std::mem::transmute;
+use std::num::ParseIntError;
 use std::ops::Deref;
 use std::os::unix::ffi::OsStrExt;
 use std::os::unix::io::AsFd;
@@ -25,6 +26,7 @@ use std::ptr;
 use std::ptr::NonNull;
 use std::slice;
 use std::slice::from_raw_parts;
+use std::str::FromStr;
 
 use bitflags::bitflags;
 use libbpf_sys::bpf_map_info;
@@ -1920,19 +1922,17 @@ pub struct MapFdInfo {
 impl MapFdInfo {
     /// Create a `MapFdInfo` by reading `/proc/self/fdinfo` for the given fd.
     pub fn from_fd(fd: BorrowedFd<'_>) -> Result<Self> {
+        fn parse<T: FromStr<Err = ParseIntError>>(key: &str, val: &str) -> Result<T> {
+            val.parse().map_err(|e| {
+                Error::with_invalid_data(format!(
+                    "failed to parse map fd info data for key `{key}`: {e}"
+                ))
+            })
+        }
+
         let path = format!("/proc/self/fdinfo/{}", fd.as_raw_fd());
         let file = File::open(&path).with_context(|| format!("failed to open `{path}`"))?;
         let reader = BufReader::new(file);
-
-        let parse = |key: &str, val: &str| -> Result<u32> {
-            val.parse()
-                .map_err(|e| Error::with_invalid_data(format!("`{key}`: {e}")))
-        };
-
-        let parse_u64 = |key: &str, val: &str| -> Result<u64> {
-            val.parse()
-                .map_err(|e| Error::with_invalid_data(format!("`{key}`: {e}")))
-        };
 
         let mut map_type = None;
         let mut key_size = None;
@@ -1956,7 +1956,7 @@ impl MapFdInfo {
             let value = value.trim();
 
             match key {
-                "map_type" => map_type = Some(parse(key, value)?),
+                "map_type" => map_type = Some(parse::<u32>(key, value)?),
                 "key_size" => key_size = Some(parse(key, value)?),
                 "value_size" => value_size = Some(parse(key, value)?),
                 "max_entries" => max_entries = Some(parse(key, value)?),
@@ -1967,11 +1967,11 @@ impl MapFdInfo {
                 "map_extra" => {
                     map_extra = Some(parse_hex(value).with_context(|| format!("bad `{key}`"))?)
                 }
-                "memlock" => memlock = Some(parse_u64(key, value)?),
+                "memlock" => memlock = Some(parse(key, value)?),
                 "map_id" => map_id = Some(parse(key, value)?),
-                "frozen" => frozen = Some(parse(key, value)? != 0),
-                "owner_prog_type" => owner_prog_type = Some(parse(key, value)?),
-                "owner_jited" => owner_jited = Some(parse(key, value)? != 0),
+                "frozen" => frozen = Some(parse::<u32>(key, value)? != 0),
+                "owner_prog_type" => owner_prog_type = Some(parse::<u32>(key, value)?),
+                "owner_jited" => owner_jited = Some(parse::<u32>(key, value)? != 0),
                 _ => {}
             }
         }
