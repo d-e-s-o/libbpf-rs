@@ -1,3 +1,15 @@
+Unreleased
+----------
+- Adjusted `OpenProgram::insns()` to return instructions borrowed from
+  the program instead of from the object, as they may get reallocated
+- Adjusted `name()` and `section()` of `OpenProgram` and `Program`, as
+  well as `Program::insns()` and `OpenMap::name()`, to return data
+  borrowed from the program or map instead of from the object, as it
+  could otherwise outlive the skeleton it was retrieved from
+- Fixed `MapInfo::name()` returning a string with an arbitrary lifetime
+  instead of one borrowed from the `MapInfo`
+
+
 0.27.2
 ------
 - Added `MapType::Arena` variant
