@@ -59,3 +59,6 @@ unchecked-time-subtraction = "warn"
 uninlined-format-args = "warn"
 use-self = "warn"
 wildcard-imports = "warn"
+
+[patch.crates-io]
+libbpf-sys = { git = "https://github.com/libbpf/libbpf-sys.git", rev = "c369a986e7f2595755731ee80636df4fd63052ba" }
